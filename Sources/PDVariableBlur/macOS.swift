@@ -10,8 +10,12 @@ import SwiftUI
 struct ContentView: View {
     
     var body: some View {
-        VariableBlurContainer(blurRadius: 20, padding: 0) {
-            // ここに “ぼかしたい” SwiftUI コンテンツを書く
+        VariableBlurContainer(
+            blurRadius: 20,
+            blurLength: 100,
+            edge:.bottom,
+            padding: 0
+        ) {
             List(0..<50, id: \.self) { i in
                 Text("Row \(i)")
                     .frame(maxWidth:.infinity,alignment: .center)
@@ -23,19 +27,29 @@ struct ContentView: View {
 #Preview{
     ContentView()
 }
+public enum BlurEdge {
+    case top      // ビュー上端側をぼかす
+    case bottom   // ビュー下端側をぼかす
+}
 /// ぼかしたい SwiftUI コンテンツを中に入れるコンテナ
 public struct VariableBlurContainer<Content: View>: NSViewRepresentable {
 
     var blurRadius: CGFloat = 20
+    var blurLength:  CGFloat
+    var edge:BlurEdge
     var padding:    CGFloat = 0
     @ViewBuilder var content: () -> Content
     
     public init(
         blurRadius: CGFloat,
+        blurLength:  CGFloat = 120,
+        edge:BlurEdge,
         padding: CGFloat,
         content: @escaping () -> Content
     ) {
         self.blurRadius = blurRadius
+        self.blurLength = blurLength
+        self.edge = edge
         self.padding = padding
         self.content = content
     }
@@ -44,6 +58,8 @@ public struct VariableBlurContainer<Content: View>: NSViewRepresentable {
     public func makeNSView(context: Context) -> FilterView {
         let filterView = FilterView()
         filterView.blurRadius = blurRadius
+        filterView.blurLength = blurLength
+        filterView.edge = edge
         filterView.padding    = padding
 
         // 中身（SwiftUI）を NSHostingView で挿入
@@ -62,18 +78,18 @@ public struct VariableBlurContainer<Content: View>: NSViewRepresentable {
 
     public func updateNSView(_ view: FilterView, context: Context) {
         view.blurRadius = blurRadius
+        view.blurLength = blurLength
+        view.edge = edge
         view.padding    = padding
     }
 }
 
 public class FilterView: NSView {
     
-    public var blurRadius: CGFloat = 50 {
-        didSet { needsDisplay = true }      // 値が変わったら再描画
-    }
-    public var padding: CGFloat = 0 {
-        didSet { needsDisplay = true }
-    }
+    public var blurRadius: CGFloat = 50  { didSet { needsDisplay = true } }
+    public var blurLength: CGFloat = 120 { didSet { needsDisplay = true } }
+    public var edge: BlurEdge     = .top { didSet { needsDisplay = true } }
+    public var padding: CGFloat   = 0    { didSet { needsDisplay = true } }
     
     // MARK: - layer 更新モードを宣言
     /// draw(_:) ではなく updateLayer() を呼ばせる
@@ -89,7 +105,7 @@ public class FilterView: NSView {
     }
     public override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
-
+        
         wantsLayer                   = true
         layerUsesCoreImageFilters    = true   // ← これを必ず true に
         layerContentsRedrawPolicy    = .onSetNeedsDisplay
@@ -107,41 +123,43 @@ public class FilterView: NSView {
         setVariableBlur(blurRadius)
     }
     private func verticalGradient(size: CGSize) -> CIImage? {
-        guard let ctx = CGContext(data: nil,
-                                  width: Int(round(size.width)),
-                                  height: Int(round(size.height)),
-                                  bitsPerComponent: 8,
-                                  bytesPerRow: 0,
-                                  space: CGColorSpaceCreateDeviceGray(),
-                                  bitmapInfo: CGImageAlphaInfo.none.rawValue)
+        
+        let total = size.height + padding * 2          // 描画範囲
+        let ratio = max(0, min(1, blurLength / total)) // 0‥1 に正規化
+        // ratio=0 → ブラー無し / 1 → 全面ブラー
+        
+        guard let ctx = CGContext(
+            data: nil,
+            width:  Int(round(size.width)),
+            height: Int(round(size.height)),
+            bitsPerComponent: 8,
+            bytesPerRow: 0,
+            space: CGColorSpaceCreateDeviceGray(),
+            bitmapInfo: CGImageAlphaInfo.none.rawValue)
         else { return nil }
         
-        /*
-         The effect range seems to depend on the bounds of the window, even if the size of the NSView is changed.
-         */
+        // 3 ストップ： 白 → 黒 → 黒
+        let colors: [NSColor] = [.white, .black, .black]
+        let locs:   [CGFloat] = [0.0,   ratio, 1.0]
         
-        let colors: [NSColor] = [
-            .black,
-            .black,
-            .black,
-            .white,
-        ]
-        let cgcolors = colors.map { $0.cgColor } as CFArray
-        
-        guard let gradient = CGGradient(colorsSpace: CGColorSpaceCreateDeviceGray(),
-                                        colors: cgcolors,
-                                        locations: nil)
+        guard let gradient = CGGradient(
+            colorsSpace: CGColorSpaceCreateDeviceGray(),
+            colors: colors.map(\.cgColor) as CFArray,
+            locations: locs)
         else { return nil }
         
-        ctx.drawLinearGradient(gradient,
-                               start: CGPoint(x: 0, y: -padding),
-                               end: CGPoint(x: 0, y: size.height + padding),
-                               options: []) //[.drawsBeforeStartLocation, .drawsAfterEndLocation])
+        // edge に応じて start / end を反転
+        let startY: CGFloat = (edge == .bottom) ? -padding              : size.height + padding
+        let endY:   CGFloat = (edge == .bottom) ? size.height + padding : -padding
         
-        guard let image = ctx.makeImage()
-        else { return nil }
+        ctx.drawLinearGradient(
+            gradient,
+            start: CGPoint(x: 0, y: startY),
+            end:   CGPoint(x: 0, y: endY),
+            options: [])
         
-        return CIImage(cgImage: image)
+        guard let cgImage = ctx.makeImage() else { return nil }
+        return CIImage(cgImage: cgImage)
     }
     
     private func setVariableBlur(_ radius: CGFloat) {
