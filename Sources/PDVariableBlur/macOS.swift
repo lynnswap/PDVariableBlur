@@ -33,7 +33,7 @@ public enum BlurEdge {
 }
 /// ぼかしたい SwiftUI コンテンツを中に入れるコンテナ
 public struct VariableBlurContainer<Content: View>: NSViewRepresentable {
-
+    
     var blurRadius: CGFloat = 20
     var blurLength:  CGFloat
     var edge:BlurEdge
@@ -53,20 +53,20 @@ public struct VariableBlurContainer<Content: View>: NSViewRepresentable {
         self.padding = padding
         self.content = content
     }
-
-    // －－ NSViewRepresentable －－
+    
     public func makeNSView(context: Context) -> FilterView {
         let filterView = FilterView()
         filterView.blurRadius = blurRadius
         filterView.blurLength = blurLength
-        filterView.edge = edge
+        filterView.edge       = edge
         filterView.padding    = padding
-
-        // 中身（SwiftUI）を NSHostingView で挿入
-        let hosting = NSHostingView(rootView: content())
+        
+        // AnyView にラップすると型の制約を気にせず差し替えられる
+        let hosting = NSHostingView(rootView: AnyView(content()))
+        context.coordinator.hosting = hosting      // ← 保持
+        
         hosting.translatesAutoresizingMaskIntoConstraints = false
         filterView.addSubview(hosting)
-
         NSLayoutConstraint.activate([
             hosting.leadingAnchor .constraint(equalTo: filterView.leadingAnchor),
             hosting.trailingAnchor.constraint(equalTo: filterView.trailingAnchor),
@@ -75,13 +75,20 @@ public struct VariableBlurContainer<Content: View>: NSViewRepresentable {
         ])
         return filterView
     }
-
+    
     public func updateNSView(_ view: FilterView, context: Context) {
         view.blurRadius = blurRadius
         view.blurLength = blurLength
-        view.edge = edge
+        view.edge       = edge
         view.padding    = padding
+        
+        // ここで差し替えるだけで SwiftUI 側の最新状態を反映
+        context.coordinator.hosting?.rootView = AnyView(content())
     }
+    public class Coordinator {
+        var hosting: NSHostingView<AnyView>?   // ← 参照を握る
+    }
+    public func makeCoordinator() -> Coordinator { Coordinator() }
 }
 
 public class FilterView: NSView {
@@ -139,7 +146,12 @@ public class FilterView: NSView {
         else { return nil }
         
         // 3 ストップ： 白 → 黒 → 黒
-        let colors: [NSColor] = [.white, .black, .black]
+        let colors: [NSColor] = [
+            .black,
+            .black,
+            .black,
+            .white,
+        ]
         let locs:   [CGFloat] = [0.0,   ratio, 1.0]
         
         guard let gradient = CGGradient(
