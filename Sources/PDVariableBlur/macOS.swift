@@ -10,7 +10,7 @@ import SwiftUI
 struct ContentView: View {
     
     var body: some View {
-        VariableBlurContainer(blurRadius: 50, padding: 0) {
+        VariableBlurContainer(blurRadius: 20, padding: 0) {
             // ここに “ぼかしたい” SwiftUI コンテンツを書く
             List(0..<50, id: \.self) { i in
                 Text("Row \(i)")
@@ -26,7 +26,7 @@ struct ContentView: View {
 /// ぼかしたい SwiftUI コンテンツを中に入れるコンテナ
 struct VariableBlurContainer<Content: View>: NSViewRepresentable {
 
-    var blurRadius: CGFloat = 50
+    var blurRadius: CGFloat = 20
     var padding:    CGFloat = 0
     @ViewBuilder var content: () -> Content
 
