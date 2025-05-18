@@ -29,6 +29,16 @@ public struct VariableBlurContainer<Content: View>: NSViewRepresentable {
     var blurRadius: CGFloat = 20
     var padding:    CGFloat = 0
     @ViewBuilder var content: () -> Content
+    
+    public init(
+        blurRadius: CGFloat,
+        padding: CGFloat,
+        content: @escaping () -> Content
+    ) {
+        self.blurRadius = blurRadius
+        self.padding = padding
+        self.content = content
+    }
 
     // －－ NSViewRepresentable －－
     public func makeNSView(context: Context) -> FilterView {
