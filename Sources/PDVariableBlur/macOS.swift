@@ -77,11 +77,11 @@ public struct VariableBlurContainer<Content: View>: NSViewRepresentable {
     }
     
     public func updateNSView(_ view: FilterView, context: Context) {
-        view.blurRadius = blurRadius
-        view.blurLength = blurLength
-        view.edge       = edge
-        view.padding    = padding
-        
+//        view.blurRadius = blurRadius
+//        view.blurLength = blurLength
+//        view.edge       = edge
+//        view.padding    = padding
+//        
         // ここで差し替えるだけで SwiftUI 側の最新状態を反映
         context.coordinator.hosting?.rootView = AnyView(content())
     }
