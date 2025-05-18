@@ -24,14 +24,14 @@ struct ContentView: View {
     ContentView()
 }
 /// ぼかしたい SwiftUI コンテンツを中に入れるコンテナ
-struct VariableBlurContainer<Content: View>: NSViewRepresentable {
+public struct VariableBlurContainer<Content: View>: NSViewRepresentable {
 
     var blurRadius: CGFloat = 20
     var padding:    CGFloat = 0
     @ViewBuilder var content: () -> Content
 
     // －－ NSViewRepresentable －－
-    func makeNSView(context: Context) -> FilterView {
+    public func makeNSView(context: Context) -> FilterView {
         let filterView = FilterView()
         filterView.blurRadius = blurRadius
         filterView.padding    = padding
@@ -50,13 +50,9 @@ struct VariableBlurContainer<Content: View>: NSViewRepresentable {
         return filterView
     }
 
-    func updateNSView(_ view: FilterView, context: Context) {
+    public func updateNSView(_ view: FilterView, context: Context) {
         view.blurRadius = blurRadius
         view.padding    = padding
-
-        if let hosting = view.subviews.first as? NSHostingView<Content> {
-            hosting.rootView = content()          // diff-aware 更新
-        }
     }
 }
 
