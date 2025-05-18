@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-
+#if os(macOS)
 struct ContentView: View {
     
     var body: some View {
@@ -184,3 +184,4 @@ public class FilterView: NSView {
         }
     }
 }
+#endif
