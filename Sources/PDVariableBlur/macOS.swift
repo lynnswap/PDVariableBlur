@@ -66,10 +66,10 @@ public struct VariableBlurContainer<Content: View>: NSViewRepresentable {
     }
     // Coordinator がオーバーレイへの参照を保持
     public class Coordinator {
+        weak var overlay: FilterOverlayView?
         weak var hosting: NSHostingView<AnyView>?
     }
     public func makeCoordinator() -> Coordinator { Coordinator() }
-    private let overlay = FilterOverlayView()
     public func makeNSView(context: Context) -> NSView {
         
         let root = NSView()
@@ -85,11 +85,9 @@ public struct VariableBlurContainer<Content: View>: NSViewRepresentable {
             host.topAnchor     .constraint(equalTo: root.topAnchor),
             host.bottomAnchor  .constraint(equalTo: root.bottomAnchor)
         ])
-        
+        let overlay = FilterOverlayView()
         // (2) オーバーレイ
         overlay.translatesAutoresizingMaskIntoConstraints = false
-        overlay.wantsLayer = true
-        overlay.layer?.isOpaque = false
         root.addSubview(overlay)
         
         // ＝＝＝ blurLength を直接使用 ＝＝＝＝
@@ -109,22 +107,21 @@ public struct VariableBlurContainer<Content: View>: NSViewRepresentable {
                 overlay.heightAnchor  .constraint(equalToConstant: blurLength)
             ])
         }
-        
-        // 初期パラメータを流し込む
         overlay.blurRadius = blurRadius
-        overlay.blurLength = blurLength     // ← 当然こちらにも
+        overlay.blurLength = blurLength
         overlay.edge       = edge
         overlay.padding    = padding
         overlay.isHidden   = !isEnabled
         
         context.coordinator.hosting = host
+        context.coordinator.overlay = overlay
         return root
     }
     
     public func updateNSView(_ root: NSView, context: Context) {
         context.coordinator.hosting?.rootView = AnyView(content())
-        if overlay.isHidden == isEnabled{
-            overlay.isHidden = isEnabled
+        if let overlay = context.coordinator.overlay {
+            overlay.isHidden = !isEnabled
         }
     }
 }
