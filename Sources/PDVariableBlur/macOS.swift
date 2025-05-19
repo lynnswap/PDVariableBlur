@@ -8,19 +8,27 @@
 import SwiftUI
 #if os(macOS)
 struct ContentView: View {
-    
+    @State private var isEnabled:Bool = true
     var body: some View {
         VariableBlurContainer(
             blurRadius: 20,
             blurLength: 100,
             edge:.bottom,
-            padding: 0
+            padding: 0,
+            isEnabled:isEnabled
         ) {
             List(0..<50, id: \.self) { i in
                 Text("Row \(i)")
                     .frame(maxWidth:.infinity,alignment: .center)
             }
             .listStyle(.sidebar)
+            .toolbar{
+                ToolbarItem(placement:.primaryAction){
+                    Toggle(isOn:$isEnabled){
+                        Text("enabled")
+                    }
+                }
+            }
         }
     }
 }
@@ -35,9 +43,10 @@ public enum BlurEdge {
 public struct VariableBlurContainer<Content: View>: NSViewRepresentable {
     
     var blurRadius: CGFloat = 20
-    var blurLength:  CGFloat
+    var blurLength: CGFloat
     var edge:BlurEdge
-    var padding:    CGFloat = 0
+    var padding: CGFloat = 0
+    var isEnabled:Bool
     @ViewBuilder var content: () -> Content
     
     public init(
@@ -45,12 +54,14 @@ public struct VariableBlurContainer<Content: View>: NSViewRepresentable {
         blurLength:  CGFloat = 120,
         edge:BlurEdge,
         padding: CGFloat,
+        isEnabled:Bool = true,
         content: @escaping () -> Content
     ) {
         self.blurRadius = blurRadius
         self.blurLength = blurLength
         self.edge = edge
         self.padding = padding
+        self.isEnabled = isEnabled
         self.content = content
     }
     
@@ -77,11 +88,12 @@ public struct VariableBlurContainer<Content: View>: NSViewRepresentable {
     }
     
     public func updateNSView(_ view: FilterView, context: Context) {
-//        view.blurRadius = blurRadius
-//        view.blurLength = blurLength
-//        view.edge       = edge
-//        view.padding    = padding
-//        
+        view.blurRadius = blurRadius
+        view.blurLength = blurLength
+        view.edge       = edge
+        view.padding    = padding
+        view.isEnabled  = isEnabled
+//
         // ここで差し替えるだけで SwiftUI 側の最新状態を反映
         context.coordinator.hosting?.rootView = AnyView(content())
     }
@@ -97,6 +109,7 @@ public class FilterView: NSView {
     public var blurLength: CGFloat = 120 { didSet { needsDisplay = true } }
     public var edge: BlurEdge     = .top { didSet { needsDisplay = true } }
     public var padding: CGFloat   = 0    { didSet { needsDisplay = true } }
+    public var isEnabled: Bool = true    { didSet { needsDisplay = true } }
     
     // MARK: - layer 更新モードを宣言
     /// draw(_:) ではなく updateLayer() を呼ばせる
@@ -108,7 +121,12 @@ public class FilterView: NSView {
         layerContentsRedrawPolicy = .onSetNeedsDisplay
         layer?.backgroundColor = NSColor.clear.cgColor
         
-        setVariableBlur(blurRadius)
+        if isEnabled{
+            setVariableBlur(blurRadius)
+        }else{
+            self.layer?.filters = nil
+        }
+       
     }
     public override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
@@ -127,7 +145,11 @@ public class FilterView: NSView {
     public override func updateLayer() {
         super.updateLayer()
         guard bounds.width > 0, bounds.height > 0 else { return }
-        setVariableBlur(blurRadius)
+        if isEnabled{
+            setVariableBlur(blurRadius)
+        }else{
+            self.layer?.filters = nil
+        }
     }
     private func verticalGradient(size: CGSize) -> CIImage? {
         
