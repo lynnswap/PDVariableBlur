@@ -25,7 +25,7 @@ struct ContentView: View {
             .toolbar{
                 ToolbarItem(placement:.primaryAction){
                     Toggle(isOn:$isEnabled){
-                        Text("enabled")
+                        Text(String("enabled"))
                     }
                 }
             }
@@ -39,16 +39,15 @@ public enum BlurEdge {
     case top      // ビュー上端側をぼかす
     case bottom   // ビュー下端側をぼかす
 }
-/// ぼかしたい SwiftUI コンテンツを中に入れるコンテナ
+
 public struct VariableBlurContainer<Content: View>: NSViewRepresentable {
-    
-    var blurRadius: CGFloat = 20
-    var blurLength: CGFloat
-    var edge:BlurEdge
+
+    var isBlurEnabled: Bool = true
+    var blurRadius:  CGFloat
+    var blurLength:  CGFloat
+    var edge: BlurEdge
     var padding: CGFloat = 0
-    var isEnabled:Bool
     @ViewBuilder var content: () -> Content
-    
     public init(
         blurRadius: CGFloat,
         blurLength:  CGFloat = 120,
@@ -61,48 +60,150 @@ public struct VariableBlurContainer<Content: View>: NSViewRepresentable {
         self.blurLength = blurLength
         self.edge = edge
         self.padding = padding
-        self.isEnabled = isEnabled
+        self.isBlurEnabled = isEnabled
         self.content = content
     }
-    
-    public func makeNSView(context: Context) -> FilterView {
-        let filterView = FilterView()
-        filterView.blurRadius = blurRadius
-        filterView.blurLength = blurLength
-        filterView.edge       = edge
-        filterView.padding    = padding
-        
-        // AnyView にラップすると型の制約を気にせず差し替えられる
-        let hosting = NSHostingView(rootView: AnyView(content()))
-        context.coordinator.hosting = hosting      // ← 保持
-        
-        hosting.translatesAutoresizingMaskIntoConstraints = false
-        filterView.addSubview(hosting)
-        NSLayoutConstraint.activate([
-            hosting.leadingAnchor .constraint(equalTo: filterView.leadingAnchor),
-            hosting.trailingAnchor.constraint(equalTo: filterView.trailingAnchor),
-            hosting.topAnchor     .constraint(equalTo: filterView.topAnchor),
-            hosting.bottomAnchor  .constraint(equalTo: filterView.bottomAnchor)
-        ])
-        return filterView
-    }
-    
-    public func updateNSView(_ view: FilterView, context: Context) {
-        view.blurRadius = blurRadius
-        view.blurLength = blurLength
-        view.edge       = edge
-        view.padding    = padding
-        view.isEnabled  = isEnabled
-//
-        // ここで差し替えるだけで SwiftUI 側の最新状態を反映
-        context.coordinator.hosting?.rootView = AnyView(content())
-    }
+    // Coordinator がオーバーレイへの参照を保持
     public class Coordinator {
-        var hosting: NSHostingView<AnyView>?   // ← 参照を握る
+        weak var overlay: FilterOverlayView?
+        weak var hosting: NSHostingView<AnyView>?
     }
     public func makeCoordinator() -> Coordinator { Coordinator() }
-}
 
+    public func makeNSView(context: Context) -> NSView {
+
+            let root = NSView()
+            root.wantsLayer = true
+
+            // (1) コンテンツ
+            let host = NSHostingView(rootView: AnyView(content()))
+            host.translatesAutoresizingMaskIntoConstraints = false
+            root.addSubview(host)
+            NSLayoutConstraint.activate([
+                host.leadingAnchor .constraint(equalTo: root.leadingAnchor),
+                host.trailingAnchor.constraint(equalTo: root.trailingAnchor),
+                host.topAnchor     .constraint(equalTo: root.topAnchor),
+                host.bottomAnchor  .constraint(equalTo: root.bottomAnchor)
+            ])
+
+            // (2) オーバーレイ
+            let overlay = FilterOverlayView()
+            overlay.translatesAutoresizingMaskIntoConstraints = false
+            overlay.wantsLayer = true
+            overlay.layer?.isOpaque = false
+            root.addSubview(overlay)
+
+            // ＝＝＝ blurLength を直接使用 ＝＝＝＝
+            switch edge {
+            case .top:
+                NSLayoutConstraint.activate([
+                    overlay.leadingAnchor .constraint(equalTo: root.leadingAnchor),
+                    overlay.trailingAnchor.constraint(equalTo: root.trailingAnchor),
+                    overlay.topAnchor     .constraint(equalTo: root.topAnchor),
+                    overlay.heightAnchor  .constraint(equalToConstant: blurLength)
+                ])
+            case .bottom:
+                NSLayoutConstraint.activate([
+                    overlay.leadingAnchor .constraint(equalTo: root.leadingAnchor),
+                    overlay.trailingAnchor.constraint(equalTo: root.trailingAnchor),
+                    overlay.bottomAnchor  .constraint(equalTo: root.bottomAnchor),
+                    overlay.heightAnchor  .constraint(equalToConstant: blurLength)
+                ])
+            }
+
+            // 初期パラメータを流し込む
+            overlay.blurRadius = blurRadius
+            overlay.blurLength = blurLength     // ← 当然こちらにも
+            overlay.edge       = edge
+            overlay.padding    = padding
+            overlay.isHidden   = !isBlurEnabled
+
+            context.coordinator.overlay = overlay
+            context.coordinator.hosting = host
+            return root
+        }
+
+        public func updateNSView(_ root: NSView, context: Context) {
+            context.coordinator.hosting?.rootView = AnyView(content())
+
+            if let o = context.coordinator.overlay {
+                o.blurRadius = blurRadius
+                o.blurLength = blurLength         // ← 更新時も同じ
+                o.edge       = edge
+                o.padding    = padding
+                o.isHidden   = !isBlurEnabled
+            }
+        }
+}
+final class FilterOverlayView: NSView {
+
+    var blurRadius: CGFloat = 20   { didSet { updateFilter() } }
+    var blurLength: CGFloat = 120  { didSet { updateFilter() } }
+    var edge: BlurEdge = .bottom   { didSet { updateFilter() } }
+    var padding: CGFloat = 0       { didSet { updateFilter() } }
+
+    override var wantsUpdateLayer: Bool { true }
+    override func updateLayer() { updateFilter() }
+
+    private func updateFilter() {
+        guard bounds.width > 0, bounds.height > 0 else { return }
+
+        let f = CIFilter(name: "CIMaskedVariableBlur")!
+        f.setDefaults()
+        f.setValue(verticalGradient(size: bounds.size), forKey: "inputMask")
+        f.setValue(blurRadius, forKey: kCIInputRadiusKey)
+
+        // ▼ 背面だけに効かせる
+        layerUsesCoreImageFilters = true
+        layer?.backgroundFilters = [f]   // ← ここが change!
+    }
+
+    /// マスク生成（縦グラデーション）
+    private func verticalGradient(size: CGSize) -> CIImage? {
+        
+        let total = size.height + padding * 2          // 描画範囲
+        let ratio = max(0, min(1, blurLength / total)) // 0‥1 に正規化
+        // ratio=0 → ブラー無し / 1 → 全面ブラー
+        
+        guard let ctx = CGContext(
+            data: nil,
+            width:  Int(round(size.width)),
+            height: Int(round(size.height)),
+            bitsPerComponent: 8,
+            bytesPerRow: 0,
+            space: CGColorSpaceCreateDeviceGray(),
+            bitmapInfo: CGImageAlphaInfo.none.rawValue)
+        else { return nil }
+        
+        // 3 ストップ： 白 → 黒 → 黒
+        let colors: [NSColor] = [
+            .black,
+            .black,
+            .black,
+            .white,
+        ]
+        let locs:   [CGFloat] = [0.0,   ratio, 1.0]
+        
+        guard let gradient = CGGradient(
+            colorsSpace: CGColorSpaceCreateDeviceGray(),
+            colors: colors.map(\.cgColor) as CFArray,
+            locations: locs)
+        else { return nil }
+        
+        // edge に応じて start / end を反転
+        let startY: CGFloat = (edge == .bottom) ? -padding              : size.height + padding
+        let endY:   CGFloat = (edge == .bottom) ? size.height + padding : -padding
+        
+        ctx.drawLinearGradient(
+            gradient,
+            start: CGPoint(x: 0, y: startY),
+            end:   CGPoint(x: 0, y: endY),
+            options: [])
+        
+        guard let cgImage = ctx.makeImage() else { return nil }
+        return CIImage(cgImage: cgImage)
+    }
+}
 public class FilterView: NSView {
     
     public var blurRadius: CGFloat = 50  { didSet { needsDisplay = true } }
