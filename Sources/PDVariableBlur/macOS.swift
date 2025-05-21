@@ -67,7 +67,7 @@ public struct VariableBlurContainer<Content: View>: NSViewRepresentable {
     // Coordinator がオーバーレイへの参照を保持
     public class Coordinator {
         weak var overlay: FilterOverlayView?
-        weak var hosting: NSHostingView<AnyView>?
+        weak var hosting: NSHostingView<Content>?
     }
     public func makeCoordinator() -> Coordinator { Coordinator() }
     public func makeNSView(context: Context) -> NSView {
@@ -76,7 +76,7 @@ public struct VariableBlurContainer<Content: View>: NSViewRepresentable {
         root.wantsLayer = true
         
         // (1) コンテンツ
-        let host = NSHostingView(rootView: AnyView(content()))
+        let host = NSHostingView(rootView: content())
         host.translatesAutoresizingMaskIntoConstraints = false
         root.addSubview(host)
         NSLayoutConstraint.activate([
@@ -119,7 +119,7 @@ public struct VariableBlurContainer<Content: View>: NSViewRepresentable {
     }
     
     public func updateNSView(_ root: NSView, context: Context) {
-        context.coordinator.hosting?.rootView = AnyView(content())
+        context.coordinator.hosting?.rootView = content()
         if let overlay = context.coordinator.overlay {
             overlay.isHidden = !isEnabled
         }
