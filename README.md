@@ -32,6 +32,7 @@ public enum VariableBlurDirection {
     case top      // blur starts at the top edge
     case bottom   // blur starts at the bottom edge
     case trailing // blur starts at the trailing edge
+    case leading  // blur starts at the leading edge
 }
 ```
 
