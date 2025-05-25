@@ -3,7 +3,7 @@
 
 
 import SwiftUI
-public enum VariableBlurDirection {
+public enum VariableBlurEdge {
     /// Blur starts from the top edge and gradually clears toward the bottom.
     case top
     /// Blur starts from the bottom edge and gradually clears toward the top.
@@ -25,7 +25,7 @@ public struct VariableBlurView: UIViewRepresentable {
     
     public var maxBlurRadius: CGFloat = 20
     
-    public var direction: VariableBlurDirection = .top
+    public var edge: VariableBlurEdge = .top
     
     public var startOffset: CGFloat = 0
     
@@ -33,12 +33,12 @@ public struct VariableBlurView: UIViewRepresentable {
     public var tintStartOpacity: CGFloat?
     
     public init(maxBlurRadius: CGFloat = 20,
-                direction: VariableBlurDirection = .top,
+                edge: VariableBlurEdge = .top,
                 startOffset: CGFloat = 0,
                 tintColor: UIColor? = nil,
                 tintStartOpacity: CGFloat? = nil) {
         self.maxBlurRadius      = maxBlurRadius
-        self.direction          = direction
+        self.edge               = edge
         self.startOffset        = startOffset
         self.tintColor          = tintColor
         self.tintStartOpacity   = tintStartOpacity
@@ -46,7 +46,7 @@ public struct VariableBlurView: UIViewRepresentable {
     
     public func makeUIView(context: Context) -> VariableBlurUIView {
         VariableBlurUIView(maxBlurRadius: maxBlurRadius,
-                           direction: direction,
+                           edge: edge,
                            startOffset: startOffset,
                            tintColor: tintColor,
                            tintStartOpacity: tintStartOpacity)
@@ -60,7 +60,7 @@ open class VariableBlurUIView: UIVisualEffectView {
 
     // MARK: - Public Stored Properties
     public var maxBlurRadius: CGFloat          { didSet { refresh() } }
-    public var direction:      VariableBlurDirection { didSet { refresh() } }
+    public var edge:           VariableBlurEdge { didSet { refresh() } }
     /// 0.0〜1.0  (0 = 端から徐々にクリア、1 = ほぼ全域がブラー)
     public var startOffset:    CGFloat         { didSet { refresh() } }
     /// nil ならブラーのみ。色を指定すると同勾配でカラーオーバーレイを追加
@@ -72,12 +72,12 @@ open class VariableBlurUIView: UIVisualEffectView {
 
     // MARK: - Init
     public init(maxBlurRadius: CGFloat = 20,
-                direction: VariableBlurDirection = .top,
+                edge: VariableBlurEdge = .top,
                 startOffset: CGFloat = 0,
                 tintColor: UIColor? = nil,
                 tintStartOpacity: CGFloat? = nil) {
         self.maxBlurRadius = maxBlurRadius
-        self.direction     = direction
+        self.edge          = edge
         self.startOffset   = startOffset
         self.bluredTintColor     = tintColor
         self.tintStartOpacity    = tintStartOpacity
@@ -167,7 +167,7 @@ open class VariableBlurUIView: UIVisualEffectView {
     }
 
     private func setGradientPoints(for layer: CAGradientLayer) {
-        switch direction {
+        switch edge {
         case .top:
             layer.startPoint = CGPoint(x: 0.5, y: 0.0)
             layer.endPoint   = CGPoint(x: 0.5, y: 1.0)
@@ -191,7 +191,7 @@ open class VariableBlurUIView: UIVisualEffectView {
         filter.color0 = CIColor.black
         filter.color1 = CIColor.clear
 
-        switch direction {
+        switch edge {
         case .top:
             filter.point0 = CGPoint(x: 0, y: height)
             filter.point1 = CGPoint(x: 0, y: startOffset * height)
@@ -226,13 +226,13 @@ open class VariableBlurUIView: UIVisualEffectView {
         VStack{
             VariableBlurView(
                 maxBlurRadius:60,
-                direction: .top,
+                edge: .top,
                 tintColor: UIColor(Color.indigo)
             )
             .frame(height:150)
             Spacer()
             VariableBlurView(
-                direction: .bottom,
+                edge: .bottom,
                 tintColor: UIColor(Color.blue)
             )
             .frame(height:110)

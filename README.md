@@ -7,7 +7,7 @@ PDVariableBlur provides a variable blur effect for SwiftUI views on iOS and macO
 ### iOS
 
 ```swift
-VariableBlurView(direction: .top,
+VariableBlurView(edge: .top,
                  tintColor: UIColor.black.withAlphaComponent(0.3))
     .frame(height: 200)
 ```
@@ -23,12 +23,12 @@ VariableBlurContainer(blurRadius: 20,
 }
 ```
 
-### Direction
+### Edge
 
-`VariableBlurDirection` specifies from which edge the blur starts.
+`VariableBlurEdge` specifies from which edge the blur starts.
 
 ```swift
-public enum VariableBlurDirection {
+public enum VariableBlurEdge {
     case top      // blur starts at the top edge
     case bottom   // blur starts at the bottom edge
     case trailing // blur starts at the trailing edge
