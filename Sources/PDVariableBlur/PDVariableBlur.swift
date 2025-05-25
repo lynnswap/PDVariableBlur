@@ -4,9 +4,12 @@
 
 import SwiftUI
 public enum VariableBlurDirection {
-    case blurredTopClearBottom
-    case blurredBottomClearTop
-    case blurredTrailingClearLeading
+    /// Blur starts from the top edge and gradually clears toward the bottom.
+    case top
+    /// Blur starts from the bottom edge and gradually clears toward the top.
+    case bottom
+    /// Blur starts from the trailing edge and gradually clears toward the leading edge.
+    case trailing
 }
 
 #if canImport(UIKit)
@@ -20,7 +23,7 @@ public struct VariableBlurView: UIViewRepresentable {
     
     public var maxBlurRadius: CGFloat = 20
     
-    public var direction: VariableBlurDirection = .blurredTopClearBottom
+    public var direction: VariableBlurDirection = .top
     
     public var startOffset: CGFloat = 0
     
@@ -28,7 +31,7 @@ public struct VariableBlurView: UIViewRepresentable {
     public var tintStartOpacity: CGFloat?
     
     public init(maxBlurRadius: CGFloat = 20,
-                direction: VariableBlurDirection = .blurredTopClearBottom,
+                direction: VariableBlurDirection = .top,
                 startOffset: CGFloat = 0,
                 tintColor: UIColor? = nil,
                 tintStartOpacity: CGFloat? = nil) {
@@ -67,7 +70,7 @@ open class VariableBlurUIView: UIVisualEffectView {
 
     // MARK: - Init
     public init(maxBlurRadius: CGFloat = 20,
-                direction: VariableBlurDirection = .blurredTopClearBottom,
+                direction: VariableBlurDirection = .top,
                 startOffset: CGFloat = 0,
                 tintColor: UIColor? = nil,
                 tintStartOpacity: CGFloat? = nil) {
@@ -163,13 +166,13 @@ open class VariableBlurUIView: UIVisualEffectView {
 
     private func setGradientPoints(for layer: CAGradientLayer) {
         switch direction {
-        case .blurredTopClearBottom:
+        case .top:
             layer.startPoint = CGPoint(x: 0.5, y: 0.0)
             layer.endPoint   = CGPoint(x: 0.5, y: 1.0)
-        case .blurredBottomClearTop:
+        case .bottom:
             layer.startPoint = CGPoint(x: 0.5, y: 1.0)
             layer.endPoint   = CGPoint(x: 0.5, y: 0.0)
-        case .blurredTrailingClearLeading:
+        case .trailing:
             layer.startPoint = CGPoint(x: 1.0, y: 0.5)
             layer.endPoint   = CGPoint(x: 0.0, y: 0.5)
         }
@@ -184,13 +187,13 @@ open class VariableBlurUIView: UIVisualEffectView {
         filter.color1 = CIColor.clear
 
         switch direction {
-        case .blurredTopClearBottom:
+        case .top:
             filter.point0 = CGPoint(x: 0, y: height)
             filter.point1 = CGPoint(x: 0, y: startOffset * height)
-        case .blurredBottomClearTop:
+        case .bottom:
             filter.point0 = CGPoint(x: 0, y: 0)
             filter.point1 = CGPoint(x: 0, y: height - startOffset * height)
-        case .blurredTrailingClearLeading:
+        case .trailing:
             filter.point0 = CGPoint(x: width, y: 0)
             filter.point1 = CGPoint(x: startOffset * width, y: 0)
         }
@@ -213,8 +216,8 @@ open class VariableBlurUIView: UIVisualEffectView {
         VStack{
             Spacer()
             VariableBlurView(
-                direction:.blurredTopClearBottom,
-                tintColor:UIColor(Color.mint)
+                direction: .top,
+                tintColor: UIColor(Color.mint)
             )
             .frame(height:360)
         }
