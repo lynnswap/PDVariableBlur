@@ -35,7 +35,7 @@ struct ContentView: View {
 #Preview{
     ContentView()
 }
-public enum BlurEdge {
+public enum VariableBlurEdge {
     case top      // ビュー上端側をぼかす
     case bottom   // ビュー下端側をぼかす
 }
@@ -45,14 +45,14 @@ public struct VariableBlurContainer<Content: View>: NSViewRepresentable {
     
     var blurRadius:  CGFloat
     var blurLength:  CGFloat
-    var edge: BlurEdge
+    var edge: VariableBlurEdge
     var padding: CGFloat = 0
     var isEnabled: Bool = true
     @ViewBuilder var content: () -> Content
     public init(
         blurRadius: CGFloat,
         blurLength:  CGFloat = 120,
-        edge:BlurEdge,
+        edge:VariableBlurEdge,
         padding: CGFloat,
         isEnabled:Bool = true,
         content: @escaping () -> Content
@@ -129,7 +129,7 @@ public final class FilterOverlayView: NSView {
 
     var blurRadius: CGFloat = 20   { didSet { updateFilter() } }
     var blurLength: CGFloat = 120  { didSet { updateFilter() } }
-    var edge: BlurEdge = .bottom   { didSet { updateFilter() } }
+    var edge: VariableBlurEdge = .bottom   { didSet { updateFilter() } }
     var padding: CGFloat = 0       { didSet { updateFilter() } }
 
     public override var wantsUpdateLayer: Bool { true }
@@ -198,7 +198,7 @@ public class FilterView: NSView {
     
     public var blurRadius: CGFloat = 50  { didSet { needsDisplay = true } }
     public var blurLength: CGFloat = 120 { didSet { needsDisplay = true } }
-    public var edge: BlurEdge     = .top { didSet { needsDisplay = true } }
+    public var edge: VariableBlurEdge     = .top { didSet { needsDisplay = true } }
     public var padding: CGFloat   = 0    { didSet { needsDisplay = true } }
     public var isEnabled: Bool = true    { didSet { needsDisplay = true } }
     
