@@ -35,10 +35,6 @@ struct ContentView: View {
 #Preview{
     ContentView()
 }
-public enum VariableBlurEdge {
-    case top      // ビュー上端側をぼかす
-    case bottom   // ビュー下端側をぼかす
-}
 
 public struct VariableBlurContainer<Content: View>: NSViewRepresentable {
     
