@@ -211,18 +211,26 @@ open class VariableBlurUIView: UIVisualEffectView {
 #Preview{
     ZStack{
         Color.black
+        Rectangle()
+            .fill(.white)
+            .frame(width: 20)
             .ignoresSafeArea()
-
         VStack{
+            VariableBlurView(
+                maxBlurRadius:60,
+                direction: .top,
+                tintColor: UIColor(Color.indigo)
+            )
+            .frame(height:150)
             Spacer()
             VariableBlurView(
-                direction: .top,
-                tintColor: UIColor(Color.mint)
+                direction: .bottom,
+                tintColor: UIColor(Color.blue)
             )
-            .frame(height:360)
+            .frame(height:110)
         }
-        .ignoresSafeArea()
     }
+    .ignoresSafeArea()
 }
 #endif
 
