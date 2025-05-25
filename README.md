@@ -7,8 +7,9 @@ PDVariableBlur provides a variable blur effect for SwiftUI views on iOS and macO
 ### iOS
 
 ```swift
+// You can use either `UIColor` or SwiftUI's `Color`
 VariableBlurView(edge: .top,
-                 tintColor: UIColor.black.withAlphaComponent(0.3))
+                 tintColor: .black.opacity(0.3))
     .frame(height: 200)
 ```
 
