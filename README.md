@@ -36,3 +36,7 @@ public enum VariableBlurDirection {
 ```
 
 Install via Swift Package Manager and import `PDVariableBlur` in your project.
+
+## License
+
+PDVariableBlur is released under the MIT License. See [LICENSE](LICENSE) for details.
