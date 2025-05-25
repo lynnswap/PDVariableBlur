@@ -9,42 +9,7 @@ public enum VariableBlurDirection {
     case blurredTrailingClearLeading
 }
 
-
-#if os(macOS)
-public struct VariableBlurView: NSViewRepresentable {
-    
-    public var maxBlurRadius: CGFloat = 20
-    
-    public var direction: VariableBlurDirection = .blurredTopClearBottom
-    
-    public var startOffset: CGFloat = 0
-    public var bluredTintColor: NSColor?
-    public var tintStartOpacity: CGFloat?
-    
-    public init(
-        maxBlurRadius: CGFloat = 20,
-        direction: VariableBlurDirection = .blurredTopClearBottom,
-        startOffset: CGFloat = 0,
-        tintColor: NSColor? = nil,
-        tintStartOpacity: CGFloat? = nil
-    ) {
-            
-        self.maxBlurRadius = maxBlurRadius
-        self.direction = direction
-        self.startOffset = startOffset
-        self.bluredTintColor     = tintColor
-        self.tintStartOpacity    = tintStartOpacity
-    }
-    
-    public func makeNSView(context: Context) -> NSView {
-        NSView()
-    }
-
-    public func updateNSView(_ uiView: NSView, context: Context) {
-    }
-}
-
-#else
+#if canImport(UIKit)
 import UIKit
 import CoreImage.CIFilterBuiltins
 import QuartzCore
