@@ -31,7 +31,7 @@ public struct VariableBlurView: UIViewRepresentable {
     
     public var tintColor: UIColor?
     public var tintStartOpacity: CGFloat?
-    
+
     public init(maxBlurRadius: CGFloat = 20,
                 edge: VariableBlurEdge = .top,
                 startOffset: CGFloat = 0,
@@ -42,6 +42,18 @@ public struct VariableBlurView: UIViewRepresentable {
         self.startOffset        = startOffset
         self.tintColor          = tintColor
         self.tintStartOpacity   = tintStartOpacity
+    }
+
+    public init(maxBlurRadius: CGFloat = 20,
+                edge: VariableBlurEdge = .top,
+                startOffset: CGFloat = 0,
+                tintColor: Color?,
+                tintStartOpacity: CGFloat? = nil) {
+        self.init(maxBlurRadius: maxBlurRadius,
+                  edge: edge,
+                  startOffset: startOffset,
+                  tintColor: tintColor.map { UIColor($0) },
+                  tintStartOpacity: tintStartOpacity)
     }
     
     public func makeUIView(context: Context) -> VariableBlurUIView {
@@ -85,6 +97,18 @@ open class VariableBlurUIView: UIVisualEffectView {
         isUserInteractionEnabled = false
         applyVariableBlur()
         applyTintGradientIfNeeded()
+    }
+
+    public convenience init(maxBlurRadius: CGFloat = 20,
+                            edge: VariableBlurEdge = .top,
+                            startOffset: CGFloat = 0,
+                            tintColor: Color?,
+                            tintStartOpacity: CGFloat? = nil) {
+        self.init(maxBlurRadius: maxBlurRadius,
+                  edge: edge,
+                  startOffset: startOffset,
+                  tintColor: tintColor.map { UIColor($0) },
+                  tintStartOpacity: tintStartOpacity)
     }
 
     @available(*, unavailable) required public init?(coder: NSCoder) {
@@ -227,13 +251,13 @@ open class VariableBlurUIView: UIVisualEffectView {
             VariableBlurView(
                 maxBlurRadius:60,
                 edge: .top,
-                tintColor: UIColor(Color.indigo)
+                tintColor: Color.indigo
             )
             .frame(height:150)
             Spacer()
             VariableBlurView(
                 edge: .bottom,
-                tintColor: UIColor(Color.blue)
+                tintColor: Color.blue
             )
             .frame(height:110)
         }
