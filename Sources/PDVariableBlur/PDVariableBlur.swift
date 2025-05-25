@@ -10,6 +10,8 @@ public enum VariableBlurDirection {
     case bottom
     /// Blur starts from the trailing edge and gradually clears toward the leading edge.
     case trailing
+    /// Blur starts from the leading edge and gradually clears toward the trailing edge.
+    case leading
 }
 
 #if canImport(UIKit)
@@ -175,6 +177,9 @@ open class VariableBlurUIView: UIVisualEffectView {
         case .trailing:
             layer.startPoint = CGPoint(x: 1.0, y: 0.5)
             layer.endPoint   = CGPoint(x: 0.0, y: 0.5)
+        case .leading:
+            layer.startPoint = CGPoint(x: 0.0, y: 0.5)
+            layer.endPoint   = CGPoint(x: 1.0, y: 0.5)
         }
     }
 
@@ -196,6 +201,9 @@ open class VariableBlurUIView: UIVisualEffectView {
         case .trailing:
             filter.point0 = CGPoint(x: width, y: 0)
             filter.point1 = CGPoint(x: startOffset * width, y: 0)
+        case .leading:
+            filter.point0 = CGPoint(x: 0, y: 0)
+            filter.point1 = CGPoint(x: width - startOffset * width, y: 0)
         }
 
         let ciImage = filter.outputImage!
