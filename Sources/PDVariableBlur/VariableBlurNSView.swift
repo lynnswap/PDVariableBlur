@@ -19,7 +19,7 @@ public struct VariableBlurView: NSViewRepresentable {
 
     public init(
         radius: CGFloat = 20,
-        edge: VariableBlurEdge = .top,
+        edge: VariableBlurEdge,
         offset: CGFloat = 0,
         tint: NSColor? = nil,
         tintOpacity: CGFloat? = nil
@@ -33,7 +33,7 @@ public struct VariableBlurView: NSViewRepresentable {
 
     public init(
         radius: CGFloat = 20,
-        edge: VariableBlurEdge = .top,
+        edge: VariableBlurEdge,
         offset: CGFloat = 0,
         tint: Color?,
         tintOpacity: CGFloat? = nil
@@ -87,7 +87,7 @@ open class VariableBlurNSView: NSView {
     // MARK: Init ---------------------------------------------------------
     public init(
         radius: CGFloat = 20,
-        edge: VariableBlurEdge = .top,
+        edge: VariableBlurEdge,
         offset: CGFloat = 0,
         tint: NSColor? = nil,
         tintOpacity: CGFloat? = nil
