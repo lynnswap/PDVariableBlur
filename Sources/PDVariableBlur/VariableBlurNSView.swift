@@ -57,6 +57,11 @@ public struct VariableBlurView: NSViewRepresentable {
     }
 
     public func updateNSView(_ nsView: VariableBlurNSView, context: Context) {
+        nsView.radius = radius
+        nsView.edge = edge
+        nsView.offset = offset
+        nsView.bluredTintColor = tint
+        nsView.tintOpacity = tintOpacity
     }
 }
 
