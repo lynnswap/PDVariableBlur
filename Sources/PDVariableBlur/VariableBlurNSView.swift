@@ -152,7 +152,7 @@ open class VariableBlurNSView: NSView {
         }
 
         variableBlur.setValue(radius, forKey: "inputRadius")
-        variableBlur.setValue(makeGradientImage(), forKey: "inputMaskImage")
+        variableBlur.setValue(edge.gradientMaskImage(offset: offset), forKey: "inputMaskImage")
         variableBlur.setValue(true, forKey: "inputNormalizeEdges")
 
         backdropLayer.filters = [variableBlur]
@@ -169,7 +169,9 @@ open class VariableBlurNSView: NSView {
             tint.withAlphaComponent(startAlpha).cgColor,
             tint.withAlphaComponent(0).cgColor
         ]
-        setGradientPoints(for: layer)
+        let points = edge.gradientPoints
+        layer.startPoint = points.start
+        layer.endPoint   = points.end
         layer.locations = [0, NSNumber(value: 1 - Float(offset))]
 
         containerLayer.addSublayer(layer)
@@ -183,54 +185,12 @@ open class VariableBlurNSView: NSView {
             tint.withAlphaComponent(startAlpha).cgColor,
             tint.withAlphaComponent(0).cgColor
         ]
-        setGradientPoints(for: layer)
+        let points = edge.gradientPoints
+        layer.startPoint = points.start
+        layer.endPoint   = points.end
         layer.locations = [0, NSNumber(value: 1 - Float(offset))]
     }
     
-    private func setGradientPoints(for layer: CAGradientLayer) {
-        switch edge {
-        case .top:
-            layer.startPoint = CGPoint(x: 0.5, y: 1.0)
-            layer.endPoint   = CGPoint(x: 0.5, y: 0.0)
-        case .bottom:
-            layer.startPoint = CGPoint(x: 0.5, y: 0.0)
-            layer.endPoint   = CGPoint(x: 0.5, y: 1.0)
-        case .trailing:
-            layer.startPoint = CGPoint(x: 1.0, y: 0.5)
-            layer.endPoint   = CGPoint(x: 0.0, y: 0.5)
-        case .leading:
-            layer.startPoint = CGPoint(x: 0.0, y: 0.5)
-            layer.endPoint   = CGPoint(x: 1.0, y: 0.5)
-        }
-    }
-    
-    // MARK: - Gradient Mask Image for CAFilter
-    private func makeGradientImage(
-        width: CGFloat = 100,
-        height: CGFloat = 100
-    ) -> CGImage {
-        let filter = CIFilter.linearGradient()
-        filter.color0 = CIColor.black
-        filter.color1 = CIColor.clear
-        
-        switch edge {
-        case .top:
-            filter.point0 = CGPoint(x: 0, y: height)
-            filter.point1 = CGPoint(x: 0, y: offset * height)
-        case .bottom:
-            filter.point0 = CGPoint(x: 0, y: 0)
-            filter.point1 = CGPoint(x: 0, y: height - offset * height)
-        case .trailing:
-            filter.point0 = CGPoint(x: width, y: 0)
-            filter.point1 = CGPoint(x: offset * width, y: 0)
-        case .leading:
-            filter.point0 = CGPoint(x: 0, y: 0)
-            filter.point1 = CGPoint(x: width - offset * width, y: 0)
-        }
-        
-        let ciImage = filter.outputImage!
-        return CIContext().createCGImage(ciImage, from: CGRect(x: 0, y: 0, width: width, height: height))!
-    }
 }
 
 #endif
