@@ -97,25 +97,36 @@ public struct VariableBlurView: UIViewRepresentable {
         }
 
         func applyChanges(to view: VariableBlurUIView, radius: CGFloat, edge: VariableBlurEdge, offset: CGFloat, tint: UIColor?, tintOpacity: CGFloat?) {
+            view.isBatchUpdating = true
+            var changed = false
             if self.radius != radius {
                 self.radius = radius
                 view.radius = radius
+                changed = true
             }
             if self.edge != edge {
                 self.edge = edge
                 view.edge = edge
+                changed = true
             }
             if self.offset != offset {
                 self.offset = offset
                 view.offset = offset
+                changed = true
             }
             if self.tint != tint {
                 self.tint = tint
                 view.bluredTintColor = tint
+                changed = true
             }
             if self.tintOpacity != tintOpacity {
                 self.tintOpacity = tintOpacity
                 view.tintOpacity = tintOpacity
+                changed = true
+            }
+            view.isBatchUpdating = false
+            if changed {
+                view.refresh()
             }
         }
     }
@@ -124,14 +135,15 @@ public struct VariableBlurView: UIViewRepresentable {
 open class VariableBlurUIView: UIVisualEffectView {
 
     // MARK: - Public Stored Properties
-    public var radius: CGFloat { didSet { refresh() } }
-    public var edge: VariableBlurEdge { didSet { refresh() } }
-    public var offset: CGFloat { didSet { refresh() } }
-    public var bluredTintColor: UIColor? { didSet { refresh() } }
+    public var radius: CGFloat { didSet { if !isBatchUpdating { refresh() } } }
+    public var edge: VariableBlurEdge { didSet { if !isBatchUpdating { refresh() } } }
+    public var offset: CGFloat { didSet { if !isBatchUpdating { refresh() } } }
+    public var bluredTintColor: UIColor? { didSet { if !isBatchUpdating { refresh() } } }
 
     // MARK: - Private
     private var gradientLayer: CAGradientLayer?
-    public var tintOpacity: CGFloat? { didSet { refresh() } }
+    var isBatchUpdating = false
+    public var tintOpacity: CGFloat? { didSet { if !isBatchUpdating { refresh() } } }
 
     // MARK: - Init
     public init(
