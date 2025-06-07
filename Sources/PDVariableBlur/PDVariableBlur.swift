@@ -7,16 +7,6 @@
 
 
 import SwiftUI
-public enum VariableBlurEdge {
-    /// Blur starts from the top edge and gradually clears toward the bottom.
-    case top
-    /// Blur starts from the bottom edge and gradually clears toward the top.
-    case bottom
-    /// Blur starts from the trailing edge and gradually clears toward the leading edge.
-    case trailing
-    /// Blur starts from the leading edge and gradually clears toward the trailing edge.
-    case leading
-}
 
 #if canImport(UIKit)
 import UIKit
