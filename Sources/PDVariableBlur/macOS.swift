@@ -137,18 +137,22 @@ public final class FilterOverlayView: NSView {
     private func updateFilter() {
         guard bounds.width > 0, bounds.height > 0 else { return }
 
-        let f = CIFilter(name: "CIMaskedVariableBlur")!
-        f.setDefaults()
-        f.setValue(verticalGradient(size: bounds.size), forKey: "inputMask")
-        f.setValue(blurRadius, forKey: kCIInputRadiusKey)
+        guard
+            let cls = NSClassFromString("CAFilter") as? NSObject.Type,
+            let filter = cls.perform(NSSelectorFromString("filterWithType:"),
+                                     with: "variableBlur")?.takeUnretainedValue() as? NSObject
+        else { return }
 
-        // ▼ 背面のみをぼかす
-        layerUsesCoreImageFilters = true
-        layer?.backgroundFilters = [f]
+        filter.setValue(blurRadius, forKey: "inputRadius")
+        filter.setValue(verticalGradientImage(size: bounds.size),
+                        forKey: "inputMaskImage")
+        filter.setValue(true, forKey: "inputNormalizeEdges")
+
+        layer?.backgroundFilters = [filter]
     }
 
     /// マスク生成（縦グラデーション）
-    private func verticalGradient(size: CGSize) -> CIImage? {
+    private func verticalGradientImage(size: CGSize) -> CGImage? {
         
         let total = size.height + padding * 2          // 描画範囲
         let ratio = max(0, min(1, blurLength / total)) // 0‥1 に正規化
@@ -189,8 +193,7 @@ public final class FilterOverlayView: NSView {
             end:   CGPoint(x: 0, y: endY),
             options: [])
         
-        guard let cgImage = ctx.makeImage() else { return nil }
-        return CIImage(cgImage: cgImage)
+        return ctx.makeImage()
     }
 }
 public class FilterView: NSView {
