@@ -61,6 +61,11 @@ public struct VariableBlurView: UIViewRepresentable {
     }
     
     public func updateUIView(_ uiView: VariableBlurUIView, context: Context) {
+        uiView.radius = radius
+        uiView.edge = edge
+        uiView.offset = offset
+        uiView.bluredTintColor = tint
+        uiView.tintOpacity = tintOpacity
     }
 }
 
