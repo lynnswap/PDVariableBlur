@@ -85,6 +85,8 @@ public struct VariableBlurContainer<Content: View>: NSViewRepresentable {
         // (2) オーバーレイ
         overlay.translatesAutoresizingMaskIntoConstraints = false
         overlay.wantsLayer = true
+        overlay.layer?.backgroundColor = NSColor.clear.cgColor
+        overlay.layer?.isOpaque = false
         root.addSubview(overlay)
         
         // ＝＝＝ blurLength を直接使用 ＝＝＝＝
@@ -140,9 +142,9 @@ public final class FilterOverlayView: NSView {
         f.setValue(verticalGradient(size: bounds.size), forKey: "inputMask")
         f.setValue(blurRadius, forKey: kCIInputRadiusKey)
 
-        // ▼ フィルタをウィンドウ内に限定
+        // ▼ Apply blur only within the window
         layerUsesCoreImageFilters = true
-        layer?.compositingFilter = f
+        layer?.filters = [f]
     }
 
     /// マスク生成（縦グラデーション）
