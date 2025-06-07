@@ -1,5 +1,9 @@
-// The Swift Programming Language
-// https://docs.swift.org/swift-book
+//
+//  PDVariableBlur.swift
+//  PDVariableBlur
+//
+//  Created by lynnswap on 2025/05/05.
+//
 
 
 import SwiftUI

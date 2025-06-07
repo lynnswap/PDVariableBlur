@@ -1,3 +1,10 @@
+//
+//  VariableBlurNSView.swift
+//  PDVariableBlur
+//
+//  Created by lynnswap on 2025/06/07.
+//
+
 #if canImport(AppKit)
 import AppKit
 import CoreImage.CIFilterBuiltins
