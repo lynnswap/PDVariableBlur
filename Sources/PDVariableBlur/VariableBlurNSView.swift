@@ -10,13 +10,63 @@ import AppKit
 import CoreImage.CIFilterBuiltins
 import SwiftUI
 
+public struct VariableBlurView: NSViewRepresentable {
+    public var maxBlurRadius: CGFloat = 20
+    public var edge: VariableBlurEdge = .top
+    public var startOffset: CGFloat = 0
+    public var tintColor: NSColor?
+    public var tintStartOpacity: CGFloat?
+
+    public init(
+        maxBlurRadius: CGFloat = 20,
+        edge: VariableBlurEdge = .top,
+        startOffset: CGFloat = 0,
+        tintColor: NSColor? = nil,
+        tintStartOpacity: CGFloat? = nil
+    ) {
+        self.maxBlurRadius = maxBlurRadius
+        self.edge = edge
+        self.startOffset = startOffset
+        self.tintColor = tintColor
+        self.tintStartOpacity = tintStartOpacity
+    }
+
+    public init(
+        maxBlurRadius: CGFloat = 20,
+        edge: VariableBlurEdge = .top,
+        startOffset: CGFloat = 0,
+        tintColor: Color?,
+        tintStartOpacity: CGFloat? = nil
+    ) {
+        self.init(
+            maxBlurRadius: maxBlurRadius,
+            edge: edge,
+            startOffset: startOffset,
+            tintColor: tintColor.map { NSColor($0) },
+            tintStartOpacity: tintStartOpacity)
+    }
+
+    public func makeNSView(context: Context) -> VariableBlurNSView {
+        VariableBlurNSView(
+            maxBlurRadius: maxBlurRadius,
+            edge: edge,
+            startOffset: startOffset,
+            tintColor: tintColor,
+            tintStartOpacity: tintStartOpacity
+        )
+    }
+
+    public func updateNSView(_ nsView: VariableBlurNSView, context: Context) {
+    }
+}
+
 open class VariableBlurNSView: NSView {
 
     // MARK: Public Stored Properties
-    public var maxBlurRadius: CGFloat          { didSet { refresh() } }
-    public var edge:           VariableBlurEdge { didSet { refresh() } }
-    public var startOffset:    CGFloat         { didSet { refresh() } }
-    public var bluredTintColor: NSColor?       { didSet { refresh() } }
+    public var maxBlurRadius: CGFloat { didSet { refresh() } }
+    public var edge: VariableBlurEdge { didSet { refresh() } }
+    public var startOffset: CGFloat { didSet { refresh() } }
+    public var bluredTintColor: NSColor? { didSet { refresh() } }
 
     // MARK: Private
     private let containerLayer = CALayer()
@@ -25,17 +75,18 @@ open class VariableBlurNSView: NSView {
     public  var tintStartOpacity: CGFloat? { didSet { refresh() } }
 
     // MARK: Init ---------------------------------------------------------
-    public init(maxBlurRadius: CGFloat = 20,
-                edge: VariableBlurEdge = .top,
-                startOffset: CGFloat = 0,
-                tintColor: NSColor? = nil,
-                tintStartOpacity: CGFloat? = nil)
-    {
-        self.maxBlurRadius      = maxBlurRadius
-        self.edge               = edge
-        self.startOffset        = startOffset
-        self.bluredTintColor    = tintColor
-        self.tintStartOpacity   = tintStartOpacity
+    public init(
+        maxBlurRadius: CGFloat = 20,
+        edge: VariableBlurEdge = .top,
+        startOffset: CGFloat = 0,
+        tintColor: NSColor? = nil,
+        tintStartOpacity: CGFloat? = nil
+    ) {
+        self.maxBlurRadius = maxBlurRadius
+        self.edge = edge
+        self.startOffset = startOffset
+        self.bluredTintColor = tintColor
+        self.tintStartOpacity = tintStartOpacity
 
         if let BackdropLayerClass = NSClassFromString("CABackdropLayer") as? CALayer.Type {
             backdropLayer = BackdropLayerClass.init()
@@ -49,13 +100,13 @@ open class VariableBlurNSView: NSView {
         layerUsesCoreImageFilters = true
 
         // containerLayer をルートにしてフィルタから隔離 ------------------
-        containerLayer.frame              = bounds
-        containerLayer.autoresizingMask    = [.layerWidthSizable, .layerHeightSizable]
-        layer                              = containerLayer
+        containerLayer.frame = bounds
+        containerLayer.autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
+        layer = containerLayer
 
         // variableBlur を掛けるターゲットは backdropLayer ---------------
-        backdropLayer.frame               = bounds
-        backdropLayer.autoresizingMask     = [.layerWidthSizable, .layerHeightSizable]
+        backdropLayer.frame = bounds
+        backdropLayer.autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
         containerLayer.addSublayer(backdropLayer)
 
         applyVariableBlur()
@@ -95,15 +146,14 @@ open class VariableBlurNSView: NSView {
 
     // MARK: Variable-blur -----------------------------------------------
     private func applyVariableBlur() {
-        guard
-            let CAFilter      = NSClassFromString("CAFilter") as? NSObject.Type,
-            let variableBlur  = CAFilter.perform(NSSelectorFromString("filterWithType:"),
-                                                 with: "variableBlur")?.takeUnretainedValue() as? NSObject
-        else { return }
+        guard let CAFilter = NSClassFromString("CAFilter") as? NSObject.Type,
+              let variableBlur  = CAFilter.perform(NSSelectorFromString("filterWithType:"),with: "variableBlur")?.takeUnretainedValue() as? NSObject else {
+            return
+        }
 
-        variableBlur.setValue(maxBlurRadius,      forKey: "inputRadius")
-        variableBlur.setValue(makeGradientImage(),forKey: "inputMaskImage")
-        variableBlur.setValue(true,               forKey: "inputNormalizeEdges")
+        variableBlur.setValue(maxBlurRadius, forKey: "inputRadius")
+        variableBlur.setValue(makeGradientImage(), forKey: "inputMaskImage")
+        variableBlur.setValue(true, forKey: "inputNormalizeEdges")
 
         backdropLayer.filters = [variableBlur]
     }
@@ -113,9 +163,9 @@ open class VariableBlurNSView: NSView {
         guard let tint = bluredTintColor else { return }
 
         let startAlpha = tintStartOpacity ?? tint.cgColor.alpha
-        let layer      = CAGradientLayer()
-        layer.frame    = bounds
-        layer.colors   = [
+        let layer = CAGradientLayer()
+        layer.frame = bounds
+        layer.colors = [
             tint.withAlphaComponent(startAlpha).cgColor,
             tint.withAlphaComponent(0).cgColor
         ]
@@ -155,8 +205,10 @@ open class VariableBlurNSView: NSView {
     }
     
     // MARK: - Gradient Mask Image for CAFilter
-    private func makeGradientImage(width: CGFloat = 100,
-                                   height: CGFloat = 100) -> CGImage {
+    private func makeGradientImage(
+        width: CGFloat = 100,
+        height: CGFloat = 100
+    ) -> CGImage {
         let filter = CIFilter.linearGradient()
         filter.color0 = CIColor.black
         filter.color1 = CIColor.clear
@@ -177,53 +229,8 @@ open class VariableBlurNSView: NSView {
         }
         
         let ciImage = filter.outputImage!
-        return CIContext().createCGImage(ciImage,
-                                         from: CGRect(x: 0, y: 0,
-                                                      width: width,
-                                                      height: height))!
+        return CIContext().createCGImage(ciImage, from: CGRect(x: 0, y: 0, width: width, height: height))!
     }
 }
 
-public struct VariableBlurView: NSViewRepresentable {
-    public var maxBlurRadius: CGFloat = 20
-    public var edge: VariableBlurEdge = .top
-    public var startOffset: CGFloat = 0
-    public var tintColor: NSColor?
-    public var tintStartOpacity: CGFloat?
-
-    public init(maxBlurRadius: CGFloat = 20,
-                edge: VariableBlurEdge = .top,
-                startOffset: CGFloat = 0,
-                tintColor: NSColor? = nil,
-                tintStartOpacity: CGFloat? = nil) {
-        self.maxBlurRadius      = maxBlurRadius
-        self.edge               = edge
-        self.startOffset        = startOffset
-        self.tintColor          = tintColor
-        self.tintStartOpacity   = tintStartOpacity
-    }
-
-    public init(maxBlurRadius: CGFloat = 20,
-                edge: VariableBlurEdge = .top,
-                startOffset: CGFloat = 0,
-                tintColor: Color?,
-                tintStartOpacity: CGFloat? = nil) {
-        self.init(maxBlurRadius: maxBlurRadius,
-                  edge: edge,
-                  startOffset: startOffset,
-                  tintColor: tintColor.map { NSColor($0) },
-                  tintStartOpacity: tintStartOpacity)
-    }
-
-    public func makeNSView(context: Context) -> VariableBlurNSView {
-        VariableBlurNSView(maxBlurRadius: maxBlurRadius,
-                           edge: edge,
-                           startOffset: startOffset,
-                           tintColor: tintColor,
-                           tintStartOpacity: tintStartOpacity)
-    }
-
-    public func updateNSView(_ nsView: VariableBlurNSView, context: Context) {
-    }
-}
 #endif
