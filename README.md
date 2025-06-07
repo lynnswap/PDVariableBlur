@@ -12,7 +12,7 @@ Open the **Examples** scheme in Xcode to view the preview.
 ```swift
 // You can use either `UIColor` or SwiftUI's `Color`
 VariableBlurView(edge: .top,
-                 tintColor: .black.opacity(0.3))
+                 tint: .black.opacity(0.3))
     .frame(height: 200)
 ```
 
