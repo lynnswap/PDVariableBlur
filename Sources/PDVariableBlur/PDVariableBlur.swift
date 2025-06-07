@@ -22,7 +22,7 @@ public struct VariableBlurView: UIViewRepresentable {
 
     public init(
         radius: CGFloat = 20,
-        edge: VariableBlurEdge = .top,
+        edge: VariableBlurEdge,
         offset: CGFloat = 0,
         tint: UIColor? = nil,
         tintOpacity: CGFloat? = nil
@@ -36,7 +36,7 @@ public struct VariableBlurView: UIViewRepresentable {
 
     public init(
         radius: CGFloat = 20,
-        edge: VariableBlurEdge = .top,
+        edge: VariableBlurEdge,
         offset: CGFloat = 0,
         tint: Color?,
         tintOpacity: CGFloat? = nil
@@ -89,7 +89,7 @@ open class VariableBlurUIView: UIVisualEffectView {
     // MARK: - Init
     public init(
         radius: CGFloat = 20,
-        edge: VariableBlurEdge = .top,
+        edge: VariableBlurEdge,
         offset: CGFloat = 0,
         tint: UIColor? = nil,
         tintOpacity: CGFloat? = nil
@@ -107,7 +107,7 @@ open class VariableBlurUIView: UIVisualEffectView {
 
     public convenience init(
         radius: CGFloat = 20,
-        edge: VariableBlurEdge = .top,
+        edge: VariableBlurEdge,
         offset: CGFloat = 0,
         tint: Color?,
         tintOpacity: CGFloat? = nil

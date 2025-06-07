@@ -33,7 +33,7 @@ public extension View {
     /// Applies a variable blur effect as an overlay.
     func variableBlur(
         radius: CGFloat = 20,
-        edge: VariableBlurEdge = .top,
+        edge: VariableBlurEdge,
         length: CGFloat,
         offset: CGFloat = 0,
         tint: Color? = nil,

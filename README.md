@@ -16,6 +16,7 @@ Color.clear
     .variableBlur(edge: .top,
                   length: 200,
                   tint: .black.opacity(0.3))
+// The `edge` parameter is required
 // Works on macOS as well
 ```
 
