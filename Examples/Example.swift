@@ -15,15 +15,15 @@ import SwiftUI
             .ignoresSafeArea()
         VStack{
             VariableBlurView(
-                maxBlurRadius:60,
+                radius:60,
                 edge: .top,
-                tintColor: Color.indigo
+                tint: Color.indigo
             )
             .frame(height:200)
             Spacer()
             VariableBlurView(
                 edge: .bottom,
-                tintColor: Color.blue
+                tint: Color.blue
             )
             .frame(height:150)
         }
