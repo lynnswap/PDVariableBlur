@@ -32,6 +32,7 @@ The following values can be specified with `variableBlur`:
 - `offset`: start position of the gradient, from `0` to `1`.
 - `tint`: color overlay applied to the blurred area.
 - `tintOpacity`: explicit opacity value for `tint`.
+- `isEnabled`: toggles the overlay on and off. Default is `true`.
 
 ### VariableBlurView and VariableBlurViewRepresentable
 
