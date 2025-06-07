@@ -57,32 +57,30 @@ public struct VariableBlurViewRepresentable: NSViewRepresentable {
     }
 
     public func updateNSView(_ nsView: VariableBlurView, context: Context) {
-        nsView.isBatchUpdating = true
-        var changed = false
-        if nsView.radius != radius { nsView.radius = radius; changed = true }
-        if nsView.edge != edge { nsView.edge = edge; changed = true }
-        if nsView.offset != offset { nsView.offset = offset; changed = true }
-        if nsView.bluredTintColor != tint { nsView.bluredTintColor = tint; changed = true }
-        if nsView.tintOpacity != tintOpacity { nsView.tintOpacity = tintOpacity; changed = true }
-        nsView.isBatchUpdating = false
-        if changed { nsView.refresh() }
+        nsView.update(
+            radius: radius,
+            edge: edge,
+            offset: offset,
+            tint: tint,
+            tintOpacity: tintOpacity
+        )
     }
 }
 
 open class VariableBlurView: NSView {
 
     // MARK: Public Stored Properties
-    public var radius: CGFloat { didSet { if !isBatchUpdating { refresh() } } }
-    public var edge: VariableBlurEdge { didSet { if !isBatchUpdating { refresh() } } }
-    public var offset: CGFloat { didSet { if !isBatchUpdating { refresh() } } }
-    public var bluredTintColor: NSColor? { didSet { if !isBatchUpdating { refresh() } } }
+    public var radius: CGFloat
+    public var edge: VariableBlurEdge
+    public var offset: CGFloat
+    public var bluredTintColor: NSColor?
 
     // MARK: Private
     private let containerLayer = CALayer()
     private let backdropLayer : CALayer
     private var gradientLayer : CAGradientLayer?
     var isBatchUpdating = false
-    public  var tintOpacity: CGFloat? { didSet { if !isBatchUpdating { refresh() } } }
+    public  var tintOpacity: CGFloat?
 
     // MARK: Init ---------------------------------------------------------
     public init(
@@ -137,6 +135,25 @@ open class VariableBlurView: NSView {
         super.viewDidMoveToWindow()
         guard let window else { return }
         backdropLayer.setValue(window.backingScaleFactor, forKey: "scale")
+    }
+
+    /// Updates multiple parameters at once and refreshes the view when needed.
+    public func update(
+        radius: CGFloat? = nil,
+        edge: VariableBlurEdge? = nil,
+        offset: CGFloat? = nil,
+        tint: NSColor? = nil,
+        tintOpacity: CGFloat? = nil
+    ) {
+        isBatchUpdating = true
+        var changed = false
+        if let radius, self.radius != radius { self.radius = radius; changed = true }
+        if let edge, self.edge != edge { self.edge = edge; changed = true }
+        if let offset, self.offset != offset { self.offset = offset; changed = true }
+        if let tint, self.bluredTintColor != tint { self.bluredTintColor = tint; changed = true }
+        if let tintOpacity, self.tintOpacity != tintOpacity { self.tintOpacity = tintOpacity; changed = true }
+        isBatchUpdating = false
+        if changed { refresh() }
     }
 
     // MARK: Public
