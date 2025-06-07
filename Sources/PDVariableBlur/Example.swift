@@ -14,7 +14,6 @@ import SwiftUI
             .fill(.white)
             .frame(width: 20)
     }
-    .ignoresSafeArea()
     .variableBlur(
         radius: 60,
         edge: .top,
@@ -26,6 +25,7 @@ import SwiftUI
         length: 150,
         tint: Color.blue
     )
+    .ignoresSafeArea()
 #if os(macOS)
     .frame(width:400,height:600)
 #endif
