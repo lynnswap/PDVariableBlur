@@ -40,7 +40,7 @@ public extension View {
         tintOpacity: CGFloat? = nil
     ) -> some View {
         overlay(alignment: edge.overlayAlignment) {
-            VariableBlurView(
+            VariableBlurViewRepresentable(
                 radius: radius,
                 edge: edge,
                 offset: offset,

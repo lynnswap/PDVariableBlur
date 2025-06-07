@@ -1,5 +1,5 @@
 //
-//  VariableBlurNSView.swift
+//  VariableBlurView.swift
 //  PDVariableBlur
 //
 //  Created by lynnswap on 2025/06/07.
@@ -10,7 +10,7 @@ import AppKit
 import CoreImage.CIFilterBuiltins
 import SwiftUI
 
-public struct VariableBlurView: NSViewRepresentable {
+public struct VariableBlurViewRepresentable: NSViewRepresentable {
     public var radius: CGFloat = 20
     public var edge: VariableBlurEdge = .top
     public var offset: CGFloat = 0
@@ -46,8 +46,8 @@ public struct VariableBlurView: NSViewRepresentable {
             tintOpacity: tintOpacity)
     }
 
-    public func makeNSView(context: Context) -> VariableBlurNSView {
-        VariableBlurNSView(
+    public func makeNSView(context: Context) -> VariableBlurView {
+        VariableBlurView(
             radius: radius,
             edge: edge,
             offset: offset,
@@ -56,7 +56,7 @@ public struct VariableBlurView: NSViewRepresentable {
         )
     }
 
-    public func updateNSView(_ nsView: VariableBlurNSView, context: Context) {
+    public func updateNSView(_ nsView: VariableBlurView, context: Context) {
         nsView.isBatchUpdating = true
         var changed = false
         if nsView.radius != radius { nsView.radius = radius; changed = true }
@@ -69,7 +69,7 @@ public struct VariableBlurView: NSViewRepresentable {
     }
 }
 
-open class VariableBlurNSView: NSView {
+open class VariableBlurView: NSView {
 
     // MARK: Public Stored Properties
     public var radius: CGFloat { didSet { if !isBatchUpdating { refresh() } } }
