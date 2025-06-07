@@ -17,15 +17,8 @@ ZStack {
         .frame(width: 20)
 }
 .variableBlur(
-    radius: 60,
-    edge: .top,
-    length: 200,
-    tint: .indigo
-)
-.variableBlur(
     edge: .bottom,
-    length: 150,
-    tint: .blue
+    length: 150
 )
 .ignoresSafeArea()
 ```
