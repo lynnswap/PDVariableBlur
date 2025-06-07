@@ -4,7 +4,7 @@
 //
 //  Created by lynnswap on 2025/06/07.
 //
-#if canImport(SwiftUI) && DEBUG
+#if DEBUG
 import SwiftUI
 
 #Preview{
