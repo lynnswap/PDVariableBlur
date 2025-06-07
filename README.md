@@ -10,21 +10,13 @@ Open the **Examples** scheme in Xcode to view the preview.
 ### iOS
 
 ```swift
-// You can use either `UIColor` or SwiftUI's `Color`
-VariableBlurView(edge: .top,
-                 tint: .black.opacity(0.3))
+// `variableBlur` can be used on any View
+Color.clear
     .frame(height: 200)
-```
-
-### macOS
-
-```swift
-VariableBlurContainer(blurRadius: 20,
-                      blurLength: 100,
-                      edge: .bottom,
-                      padding: 0) {
-    // content
-}
+    .variableBlur(edge: .top,
+                  length: 200,
+                  tint: .black.opacity(0.3))
+// Works on macOS as well
 ```
 
 ### Edge

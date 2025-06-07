@@ -4,7 +4,7 @@
 //
 //  Created by lynnswap on 2025/06/07.
 //
-#if DEBUG
+#if canImport(SwiftUI) && DEBUG
 import SwiftUI
 
 #Preview{
@@ -14,18 +14,18 @@ import SwiftUI
             .frame(width: 20)
             .ignoresSafeArea()
         VStack{
-            VariableBlurView(
-                radius:60,
-                edge: .top,
-                tint: Color.indigo
-            )
-            .frame(height:200)
+            Color.clear
+                .frame(height: 200)
+                .variableBlur(radius: 60,
+                               edge: .top,
+                               length: 200,
+                               tint: Color.indigo)
             Spacer()
-            VariableBlurView(
-                edge: .bottom,
-                tint: Color.blue
-            )
-            .frame(height:150)
+            Color.clear
+                .frame(height: 150)
+                .variableBlur(edge: .bottom,
+                               length: 150,
+                               tint: Color.blue)
         }
     }
     .background(.black)
