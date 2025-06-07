@@ -59,30 +59,28 @@ public struct VariableBlurViewRepresentable: UIViewRepresentable {
     }
 
     public func updateUIView(_ uiView: VariableBlurView, context: Context) {
-        uiView.isBatchUpdating = true
-        var changed = false
-        if uiView.radius != radius { uiView.radius = radius; changed = true }
-        if uiView.edge != edge { uiView.edge = edge; changed = true }
-        if uiView.offset != offset { uiView.offset = offset; changed = true }
-        if uiView.bluredTintColor != tint { uiView.bluredTintColor = tint; changed = true }
-        if uiView.tintOpacity != tintOpacity { uiView.tintOpacity = tintOpacity; changed = true }
-        uiView.isBatchUpdating = false
-        if changed { uiView.refresh() }
+        uiView.update(
+            radius: radius,
+            edge: edge,
+            offset: offset,
+            tint: tint,
+            tintOpacity: tintOpacity
+        )
     }
 }
 
 open class VariableBlurView: UIVisualEffectView {
 
     // MARK: - Public Stored Properties
-    public var radius: CGFloat { didSet { if !isBatchUpdating { refresh() } } }
-    public var edge: VariableBlurEdge { didSet { if !isBatchUpdating { refresh() } } }
-    public var offset: CGFloat { didSet { if !isBatchUpdating { refresh() } } }
-    public var bluredTintColor: UIColor? { didSet { if !isBatchUpdating { refresh() } } }
+    public var radius: CGFloat
+    public var edge: VariableBlurEdge
+    public var offset: CGFloat
+    public var bluredTintColor: UIColor?
 
     // MARK: - Private
     private var gradientLayer: CAGradientLayer?
     var isBatchUpdating = false
-    public var tintOpacity: CGFloat? { didSet { if !isBatchUpdating { refresh() } } }
+    public var tintOpacity: CGFloat?
 
     // MARK: - Init
     public init(
@@ -136,6 +134,25 @@ open class VariableBlurView: UIVisualEffectView {
             let backdropLayer = subviews.first?.layer
         else { return }
         backdropLayer.setValue(window.screen.scale, forKey: "scale")
+    }
+
+    /// Updates multiple parameters at once and refreshes the view when needed.
+    public func update(
+        radius: CGFloat? = nil,
+        edge: VariableBlurEdge? = nil,
+        offset: CGFloat? = nil,
+        tint: UIColor? = nil,
+        tintOpacity: CGFloat? = nil
+    ) {
+        isBatchUpdating = true
+        var changed = false
+        if let radius, self.radius != radius { self.radius = radius; changed = true }
+        if let edge, self.edge != edge { self.edge = edge; changed = true }
+        if let offset, self.offset != offset { self.offset = offset; changed = true }
+        if let tint, self.bluredTintColor != tint { self.bluredTintColor = tint; changed = true }
+        if let tintOpacity, self.tintOpacity != tintOpacity { self.tintOpacity = tintOpacity; changed = true }
+        isBatchUpdating = false
+        if changed { refresh() }
     }
 
     // MARK: - Public: 手動更新用
