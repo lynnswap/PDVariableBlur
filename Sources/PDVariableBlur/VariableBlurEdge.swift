@@ -19,7 +19,6 @@ public enum VariableBlurEdge {
     case leading
 }
 
-#if canImport(QuartzCore) && canImport(CoreImage)
 import QuartzCore
 import CoreImage.CIFilterBuiltins
 
@@ -70,4 +69,4 @@ extension VariableBlurEdge {
         return context.createCGImage(ciImage, from: CGRect(x: 0, y: 0, width: width, height: height))!
     }
 }
-#endif
+
