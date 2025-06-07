@@ -142,9 +142,9 @@ public final class FilterOverlayView: NSView {
         f.setValue(verticalGradient(size: bounds.size), forKey: "inputMask")
         f.setValue(blurRadius, forKey: kCIInputRadiusKey)
 
-        // ▼ Apply blur only within the window
+        // ▼ 背面のみをぼかす
         layerUsesCoreImageFilters = true
-        layer?.filters = [f]
+        layer?.backgroundFilters = [f]
     }
 
     /// マスク生成（縦グラデーション）
