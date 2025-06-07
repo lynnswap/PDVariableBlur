@@ -84,6 +84,7 @@ public struct VariableBlurContainer<Content: View>: NSViewRepresentable {
         let overlay = FilterOverlayView()
         // (2) オーバーレイ
         overlay.translatesAutoresizingMaskIntoConstraints = false
+        overlay.wantsLayer = true
         root.addSubview(overlay)
         
         // ＝＝＝ blurLength を直接使用 ＝＝＝＝
@@ -139,9 +140,9 @@ public final class FilterOverlayView: NSView {
         f.setValue(verticalGradient(size: bounds.size), forKey: "inputMask")
         f.setValue(blurRadius, forKey: kCIInputRadiusKey)
 
-        // ▼ 背面だけに効かせる
+        // ▼ フィルタをウィンドウ内に限定
         layerUsesCoreImageFilters = true
-        layer?.backgroundFilters = [f]   // ← ここが change!
+        layer?.compositingFilter = f
     }
 
     /// マスク生成（縦グラデーション）
