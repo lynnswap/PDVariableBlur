@@ -2,6 +2,8 @@
 
 PDVariableBlur provides a variable blur effect for SwiftUI views on iOS and macOS.
 
+You can find a simple preview setup in `Examples/Example.swift`.
+
 ## Usage
 
 ### iOS
