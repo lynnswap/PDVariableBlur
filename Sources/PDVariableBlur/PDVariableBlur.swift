@@ -50,16 +50,6 @@ public struct VariableBlurView: UIViewRepresentable {
         )
     }
     
-    public func makeCoordinator() -> Coordinator {
-        Coordinator(
-            radius: radius,
-            edge: edge,
-            offset: offset,
-            tint: tint,
-            tintOpacity: tintOpacity
-        )
-    }
-
     public func makeUIView(context: Context) -> VariableBlurUIView {
         VariableBlurUIView(
             radius: radius,
@@ -71,64 +61,15 @@ public struct VariableBlurView: UIViewRepresentable {
     }
 
     public func updateUIView(_ uiView: VariableBlurUIView, context: Context) {
-        context.coordinator.applyChanges(
-            to: uiView,
-            radius: radius,
-            edge: edge,
-            offset: offset,
-            tint: tint,
-            tintOpacity: tintOpacity
-        )
-    }
-
-    public class Coordinator {
-        private var radius: CGFloat
-        private var edge: VariableBlurEdge
-        private var offset: CGFloat
-        private var tint: UIColor?
-        private var tintOpacity: CGFloat?
-
-        init(radius: CGFloat, edge: VariableBlurEdge, offset: CGFloat, tint: UIColor?, tintOpacity: CGFloat?) {
-            self.radius = radius
-            self.edge = edge
-            self.offset = offset
-            self.tint = tint
-            self.tintOpacity = tintOpacity
-        }
-
-        func applyChanges(to view: VariableBlurUIView, radius: CGFloat, edge: VariableBlurEdge, offset: CGFloat, tint: UIColor?, tintOpacity: CGFloat?) {
-            view.isBatchUpdating = true
-            var changed = false
-            if self.radius != radius {
-                self.radius = radius
-                view.radius = radius
-                changed = true
-            }
-            if self.edge != edge {
-                self.edge = edge
-                view.edge = edge
-                changed = true
-            }
-            if self.offset != offset {
-                self.offset = offset
-                view.offset = offset
-                changed = true
-            }
-            if self.tint != tint {
-                self.tint = tint
-                view.bluredTintColor = tint
-                changed = true
-            }
-            if self.tintOpacity != tintOpacity {
-                self.tintOpacity = tintOpacity
-                view.tintOpacity = tintOpacity
-                changed = true
-            }
-            view.isBatchUpdating = false
-            if changed {
-                view.refresh()
-            }
-        }
+        uiView.isBatchUpdating = true
+        var changed = false
+        if uiView.radius != radius { uiView.radius = radius; changed = true }
+        if uiView.edge != edge { uiView.edge = edge; changed = true }
+        if uiView.offset != offset { uiView.offset = offset; changed = true }
+        if uiView.bluredTintColor != tint { uiView.bluredTintColor = tint; changed = true }
+        if uiView.tintOpacity != tintOpacity { uiView.tintOpacity = tintOpacity; changed = true }
+        uiView.isBatchUpdating = false
+        if changed { uiView.refresh() }
     }
 }
 
