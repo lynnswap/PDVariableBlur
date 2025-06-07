@@ -11,48 +11,48 @@ import CoreImage.CIFilterBuiltins
 import SwiftUI
 
 public struct VariableBlurView: NSViewRepresentable {
-    public var maxBlurRadius: CGFloat = 20
+    public var radius: CGFloat = 20
     public var edge: VariableBlurEdge = .top
-    public var startOffset: CGFloat = 0
-    public var tintColor: NSColor?
-    public var tintStartOpacity: CGFloat?
+    public var offset: CGFloat = 0
+    public var tint: NSColor?
+    public var tintOpacity: CGFloat?
 
     public init(
-        maxBlurRadius: CGFloat = 20,
+        radius: CGFloat = 20,
         edge: VariableBlurEdge = .top,
-        startOffset: CGFloat = 0,
-        tintColor: NSColor? = nil,
-        tintStartOpacity: CGFloat? = nil
+        offset: CGFloat = 0,
+        tint: NSColor? = nil,
+        tintOpacity: CGFloat? = nil
     ) {
-        self.maxBlurRadius = maxBlurRadius
+        self.radius = radius
         self.edge = edge
-        self.startOffset = startOffset
-        self.tintColor = tintColor
-        self.tintStartOpacity = tintStartOpacity
+        self.offset = offset
+        self.tint = tint
+        self.tintOpacity = tintOpacity
     }
 
     public init(
-        maxBlurRadius: CGFloat = 20,
+        radius: CGFloat = 20,
         edge: VariableBlurEdge = .top,
-        startOffset: CGFloat = 0,
-        tintColor: Color?,
-        tintStartOpacity: CGFloat? = nil
+        offset: CGFloat = 0,
+        tint: Color?,
+        tintOpacity: CGFloat? = nil
     ) {
         self.init(
-            maxBlurRadius: maxBlurRadius,
+            radius: radius,
             edge: edge,
-            startOffset: startOffset,
-            tintColor: tintColor.map { NSColor($0) },
-            tintStartOpacity: tintStartOpacity)
+            offset: offset,
+            tint: tint.map { NSColor($0) },
+            tintOpacity: tintOpacity)
     }
 
     public func makeNSView(context: Context) -> VariableBlurNSView {
         VariableBlurNSView(
-            maxBlurRadius: maxBlurRadius,
+            radius: radius,
             edge: edge,
-            startOffset: startOffset,
-            tintColor: tintColor,
-            tintStartOpacity: tintStartOpacity
+            offset: offset,
+            tint: tint,
+            tintOpacity: tintOpacity
         )
     }
 
@@ -63,30 +63,30 @@ public struct VariableBlurView: NSViewRepresentable {
 open class VariableBlurNSView: NSView {
 
     // MARK: Public Stored Properties
-    public var maxBlurRadius: CGFloat { didSet { refresh() } }
+    public var radius: CGFloat { didSet { refresh() } }
     public var edge: VariableBlurEdge { didSet { refresh() } }
-    public var startOffset: CGFloat { didSet { refresh() } }
+    public var offset: CGFloat { didSet { refresh() } }
     public var bluredTintColor: NSColor? { didSet { refresh() } }
 
     // MARK: Private
     private let containerLayer = CALayer()
     private let backdropLayer : CALayer
     private var gradientLayer : CAGradientLayer?
-    public  var tintStartOpacity: CGFloat? { didSet { refresh() } }
+    public  var tintOpacity: CGFloat? { didSet { refresh() } }
 
     // MARK: Init ---------------------------------------------------------
     public init(
-        maxBlurRadius: CGFloat = 20,
+        radius: CGFloat = 20,
         edge: VariableBlurEdge = .top,
-        startOffset: CGFloat = 0,
-        tintColor: NSColor? = nil,
-        tintStartOpacity: CGFloat? = nil
+        offset: CGFloat = 0,
+        tint: NSColor? = nil,
+        tintOpacity: CGFloat? = nil
     ) {
-        self.maxBlurRadius = maxBlurRadius
+        self.radius = radius
         self.edge = edge
-        self.startOffset = startOffset
-        self.bluredTintColor = tintColor
-        self.tintStartOpacity = tintStartOpacity
+        self.offset = offset
+        self.bluredTintColor = tint
+        self.tintOpacity = tintOpacity
 
         if let BackdropLayerClass = NSClassFromString("CABackdropLayer") as? CALayer.Type {
             backdropLayer = BackdropLayerClass.init()
@@ -151,7 +151,7 @@ open class VariableBlurNSView: NSView {
             return
         }
 
-        variableBlur.setValue(maxBlurRadius, forKey: "inputRadius")
+        variableBlur.setValue(radius, forKey: "inputRadius")
         variableBlur.setValue(makeGradientImage(), forKey: "inputMaskImage")
         variableBlur.setValue(true, forKey: "inputNormalizeEdges")
 
@@ -162,7 +162,7 @@ open class VariableBlurNSView: NSView {
     private func applyTintGradientIfNeeded() {
         guard let tint = bluredTintColor else { return }
 
-        let startAlpha = tintStartOpacity ?? tint.cgColor.alpha
+        let startAlpha = tintOpacity ?? tint.cgColor.alpha
         let layer = CAGradientLayer()
         layer.frame = bounds
         layer.colors = [
@@ -170,7 +170,7 @@ open class VariableBlurNSView: NSView {
             tint.withAlphaComponent(0).cgColor
         ]
         setGradientPoints(for: layer)
-        layer.locations = [0, NSNumber(value: 1 - Float(startOffset))]
+        layer.locations = [0, NSNumber(value: 1 - Float(offset))]
 
         containerLayer.addSublayer(layer)
         gradientLayer = layer
@@ -178,13 +178,13 @@ open class VariableBlurNSView: NSView {
 
     private func updateTintGradient() {
         guard let layer = gradientLayer, let tint = bluredTintColor else { return }
-        let startAlpha = tintStartOpacity ?? tint.cgColor.alpha
+        let startAlpha = tintOpacity ?? tint.cgColor.alpha
         layer.colors = [
             tint.withAlphaComponent(startAlpha).cgColor,
             tint.withAlphaComponent(0).cgColor
         ]
         setGradientPoints(for: layer)
-        layer.locations = [0, NSNumber(value: 1 - Float(startOffset))]
+        layer.locations = [0, NSNumber(value: 1 - Float(offset))]
     }
     
     private func setGradientPoints(for layer: CAGradientLayer) {
@@ -216,16 +216,16 @@ open class VariableBlurNSView: NSView {
         switch edge {
         case .top:
             filter.point0 = CGPoint(x: 0, y: height)
-            filter.point1 = CGPoint(x: 0, y: startOffset * height)
+            filter.point1 = CGPoint(x: 0, y: offset * height)
         case .bottom:
             filter.point0 = CGPoint(x: 0, y: 0)
-            filter.point1 = CGPoint(x: 0, y: height - startOffset * height)
+            filter.point1 = CGPoint(x: 0, y: height - offset * height)
         case .trailing:
             filter.point0 = CGPoint(x: width, y: 0)
-            filter.point1 = CGPoint(x: startOffset * width, y: 0)
+            filter.point1 = CGPoint(x: offset * width, y: 0)
         case .leading:
             filter.point0 = CGPoint(x: 0, y: 0)
-            filter.point1 = CGPoint(x: width - startOffset * width, y: 0)
+            filter.point1 = CGPoint(x: width - offset * width, y: 0)
         }
         
         let ciImage = filter.outputImage!
