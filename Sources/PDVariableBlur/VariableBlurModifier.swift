@@ -37,20 +37,23 @@ public extension View {
         length: CGFloat,
         offset: CGFloat = 0,
         tint: Color? = nil,
-        tintOpacity: CGFloat? = nil
+        tintOpacity: CGFloat? = nil,
+        isEnabled: Bool = true
     ) -> some View {
         overlay(alignment: edge.overlayAlignment) {
-            VariableBlurViewRepresentable(
-                radius: radius,
-                edge: edge,
-                offset: offset,
-                tint: tint,
-                tintOpacity: tintOpacity
-            )
-            .frame(
-                width: edge.isVertical ? nil : length,
-                height: edge.isVertical ? length : nil
-            )
+            if isEnabled {
+                VariableBlurViewRepresentable(
+                    radius: radius,
+                    edge: edge,
+                    offset: offset,
+                    tint: tint,
+                    tintOpacity: tintOpacity
+                )
+                .frame(
+                    width: edge.isVertical ? nil : length,
+                    height: edge.isVertical ? length : nil
+                )
+            }
         }
     }
 }
