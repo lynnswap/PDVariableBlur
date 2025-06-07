@@ -2,22 +2,32 @@
 
 PDVariableBlur provides a variable blur effect for SwiftUI views on iOS and macOS.
 
-You can find a simple preview setup in `Examples/Example.swift`.
+You can find a simple preview setup in `Sources/PDVariableBlur/Example.swift`.
 Open the **Examples** scheme in Xcode to view the preview.
 
 ## Usage
 
-### iOS
+`variableBlur` can be used on any `View`:
 
 ```swift
-// `variableBlur` can be used on any View
-Color.clear
-    .frame(height: 200)
-    .variableBlur(edge: .top,
-                  length: 200,
-                  tint: .black.opacity(0.3))
-// The `edge` parameter is required
-// Works on macOS as well
+ZStack {
+    Color.black
+    Rectangle()
+        .fill(.white)
+        .frame(width: 20)
+}
+.variableBlur(
+    radius: 60,
+    edge: .top,
+    length: 200,
+    tint: .indigo
+)
+.variableBlur(
+    edge: .bottom,
+    length: 150,
+    tint: .blue
+)
+.ignoresSafeArea()
 ```
 
 ### Edge
