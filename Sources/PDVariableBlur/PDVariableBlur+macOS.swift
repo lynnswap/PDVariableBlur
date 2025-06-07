@@ -70,17 +70,16 @@ public struct VariableBlurViewRepresentable: NSViewRepresentable {
 open class VariableBlurView: NSView {
 
     // MARK: Public Stored Properties
-    public var radius: CGFloat
-    public var edge: VariableBlurEdge
-    public var offset: CGFloat
-    public var bluredTintColor: NSColor?
+    private var radius: CGFloat
+    private var edge: VariableBlurEdge
+    private var offset: CGFloat
+    private var bluredTintColor: NSColor?
 
     // MARK: Private
     private let containerLayer = CALayer()
     private let backdropLayer : CALayer
     private var gradientLayer : CAGradientLayer?
-    var isBatchUpdating = false
-    public  var tintOpacity: CGFloat?
+    private  var tintOpacity: CGFloat?
 
     // MARK: Init ---------------------------------------------------------
     public init(
@@ -145,14 +144,12 @@ open class VariableBlurView: NSView {
         tint: NSColor? = nil,
         tintOpacity: CGFloat? = nil
     ) {
-        isBatchUpdating = true
         var changed = false
         if let radius, self.radius != radius { self.radius = radius; changed = true }
         if let edge, self.edge != edge { self.edge = edge; changed = true }
         if let offset, self.offset != offset { self.offset = offset; changed = true }
         if let tint, self.bluredTintColor != tint { self.bluredTintColor = tint; changed = true }
         if let tintOpacity, self.tintOpacity != tintOpacity { self.tintOpacity = tintOpacity; changed = true }
-        isBatchUpdating = false
         if changed { refresh() }
     }
 
