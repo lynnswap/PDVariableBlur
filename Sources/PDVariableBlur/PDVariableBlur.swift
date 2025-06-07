@@ -9,11 +9,9 @@ public enum VariableBlurEdge {
     /// Blur starts from the bottom edge and gradually clears toward the top.
     case bottom
     /// Blur starts from the trailing edge and gradually clears toward the leading edge.
-#if canImport(UIKit)
     case trailing
     /// Blur starts from the leading edge and gradually clears toward the trailing edge.
     case leading
-#endif
 }
 
 #if canImport(UIKit)
@@ -239,34 +237,6 @@ open class VariableBlurUIView: UIVisualEffectView {
                                                       height: height))!
     }
 }
-
-
-#if DEBUG
-#Preview{
-    ZStack{
-        Color.black
-        Rectangle()
-            .fill(.white)
-            .frame(width: 20)
-            .ignoresSafeArea()
-        VStack{
-            VariableBlurView(
-                maxBlurRadius:60,
-                edge: .top,
-                tintColor: Color.indigo
-            )
-            .frame(height:150)
-            Spacer()
-            VariableBlurView(
-                edge: .bottom,
-                tintColor: Color.blue
-            )
-            .frame(height:110)
-        }
-    }
-    .ignoresSafeArea()
-}
-#endif
 
 #endif
 
