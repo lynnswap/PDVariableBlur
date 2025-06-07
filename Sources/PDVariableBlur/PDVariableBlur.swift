@@ -71,15 +71,13 @@ public struct VariableBlurViewRepresentable: UIViewRepresentable {
 
 open class VariableBlurView: UIVisualEffectView {
 
-    // MARK: - Public Stored Properties
     private var radius: CGFloat
     private var edge: VariableBlurEdge
     private var offset: CGFloat
     private var bluredTintColor: UIColor?
-
-    // MARK: - Private
-    private var gradientLayer: CAGradientLayer?
     private var tintOpacity: CGFloat?
+
+    private var gradientLayer: CAGradientLayer?
 
     // MARK: - Init
     public init(
