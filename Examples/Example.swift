@@ -6,6 +6,7 @@
 //
 #if DEBUG
 import SwiftUI
+import PDVariableBlur
 
 #Preview{
     ZStack{
