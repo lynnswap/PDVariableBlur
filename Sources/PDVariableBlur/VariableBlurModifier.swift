@@ -1,4 +1,10 @@
-#if canImport(SwiftUI)
+//
+//  VariableBlurModifier.swift
+//  PDVariableBlur
+//
+//  Created by lynnswap on 2025/06/07.
+//
+
 import SwiftUI
 
 public extension VariableBlurEdge {
@@ -49,4 +55,3 @@ public extension View {
     }
 }
 
-#endif
