@@ -18,12 +18,12 @@ import SwiftUI
         radius: 60,
         edge: .top,
         length: 200,
-        tint: Color.indigo
+        tint: .indigo
     )
     .variableBlur(
         edge: .bottom,
         length: 150,
-        tint: Color.blue
+        tint: .blue
     )
     .ignoresSafeArea()
 #if os(macOS)
