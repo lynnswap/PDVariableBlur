@@ -57,22 +57,32 @@ public struct VariableBlurView: NSViewRepresentable {
     }
 
     public func updateNSView(_ nsView: VariableBlurNSView, context: Context) {
+        nsView.isBatchUpdating = true
+        var changed = false
+        if nsView.radius != radius { nsView.radius = radius; changed = true }
+        if nsView.edge != edge { nsView.edge = edge; changed = true }
+        if nsView.offset != offset { nsView.offset = offset; changed = true }
+        if nsView.bluredTintColor != tint { nsView.bluredTintColor = tint; changed = true }
+        if nsView.tintOpacity != tintOpacity { nsView.tintOpacity = tintOpacity; changed = true }
+        nsView.isBatchUpdating = false
+        if changed { nsView.refresh() }
     }
 }
 
 open class VariableBlurNSView: NSView {
 
     // MARK: Public Stored Properties
-    public var radius: CGFloat { didSet { refresh() } }
-    public var edge: VariableBlurEdge { didSet { refresh() } }
-    public var offset: CGFloat { didSet { refresh() } }
-    public var bluredTintColor: NSColor? { didSet { refresh() } }
+    public var radius: CGFloat { didSet { if !isBatchUpdating { refresh() } } }
+    public var edge: VariableBlurEdge { didSet { if !isBatchUpdating { refresh() } } }
+    public var offset: CGFloat { didSet { if !isBatchUpdating { refresh() } } }
+    public var bluredTintColor: NSColor? { didSet { if !isBatchUpdating { refresh() } } }
 
     // MARK: Private
     private let containerLayer = CALayer()
     private let backdropLayer : CALayer
     private var gradientLayer : CAGradientLayer?
-    public  var tintOpacity: CGFloat? { didSet { refresh() } }
+    var isBatchUpdating = false
+    public  var tintOpacity: CGFloat? { didSet { if !isBatchUpdating { refresh() } } }
 
     // MARK: Init ---------------------------------------------------------
     public init(

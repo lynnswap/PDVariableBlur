@@ -59,22 +59,32 @@ public struct VariableBlurView: UIViewRepresentable {
             tintOpacity: tintOpacity
         )
     }
-    
+
     public func updateUIView(_ uiView: VariableBlurUIView, context: Context) {
+        uiView.isBatchUpdating = true
+        var changed = false
+        if uiView.radius != radius { uiView.radius = radius; changed = true }
+        if uiView.edge != edge { uiView.edge = edge; changed = true }
+        if uiView.offset != offset { uiView.offset = offset; changed = true }
+        if uiView.bluredTintColor != tint { uiView.bluredTintColor = tint; changed = true }
+        if uiView.tintOpacity != tintOpacity { uiView.tintOpacity = tintOpacity; changed = true }
+        uiView.isBatchUpdating = false
+        if changed { uiView.refresh() }
     }
 }
 
 open class VariableBlurUIView: UIVisualEffectView {
 
     // MARK: - Public Stored Properties
-    public var radius: CGFloat { didSet { refresh() } }
-    public var edge: VariableBlurEdge { didSet { refresh() } }
-    public var offset: CGFloat { didSet { refresh() } }
-    public var bluredTintColor: UIColor? { didSet { refresh() } }
+    public var radius: CGFloat { didSet { if !isBatchUpdating { refresh() } } }
+    public var edge: VariableBlurEdge { didSet { if !isBatchUpdating { refresh() } } }
+    public var offset: CGFloat { didSet { if !isBatchUpdating { refresh() } } }
+    public var bluredTintColor: UIColor? { didSet { if !isBatchUpdating { refresh() } } }
 
     // MARK: - Private
     private var gradientLayer: CAGradientLayer?
-    public var tintOpacity: CGFloat? { didSet { refresh() } }
+    var isBatchUpdating = false
+    public var tintOpacity: CGFloat? { didSet { if !isBatchUpdating { refresh() } } }
 
     // MARK: - Init
     public init(
