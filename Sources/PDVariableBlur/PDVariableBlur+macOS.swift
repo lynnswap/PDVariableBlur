@@ -69,17 +69,15 @@ public struct VariableBlurViewRepresentable: NSViewRepresentable {
 
 open class VariableBlurView: NSView {
 
-    // MARK: Public Stored Properties
     private var radius: CGFloat
     private var edge: VariableBlurEdge
     private var offset: CGFloat
     private var bluredTintColor: NSColor?
+    private var tintOpacity: CGFloat?
 
-    // MARK: Private
     private let containerLayer = CALayer()
     private let backdropLayer : CALayer
     private var gradientLayer : CAGradientLayer?
-    private  var tintOpacity: CGFloat?
 
     // MARK: Init ---------------------------------------------------------
     public init(
