@@ -9,30 +9,26 @@ import SwiftUI
 
 #Preview{
     ZStack{
+        Color.black
         Rectangle()
             .fill(.white)
             .frame(width: 20)
-            .ignoresSafeArea()
-        VStack{
-            VariableBlurView(
-                radius:60,
-                edge: .top,
-                tint: Color.indigo
-            )
-            .frame(height:200)
-            Spacer()
-            VariableBlurView(
-                edge: .bottom,
-                tint: Color.blue
-            )
-            .frame(height:150)
-        }
     }
-    .background(.black)
     .ignoresSafeArea()
-    #if os(macOS)
+    .variableBlur(
+        radius: 60,
+        edge: .top,
+        length: 200,
+        tint: Color.indigo
+    )
+    .variableBlur(
+        edge: .bottom,
+        length: 150,
+        tint: Color.blue
+    )
+#if os(macOS)
     .frame(width:400,height:600)
-    #endif
+#endif
 }
 
 #endif
