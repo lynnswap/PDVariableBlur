@@ -46,6 +46,16 @@ public struct VariableBlurView: NSViewRepresentable {
             tintOpacity: tintOpacity)
     }
 
+    public func makeCoordinator() -> Coordinator {
+        Coordinator(
+            radius: radius,
+            edge: edge,
+            offset: offset,
+            tint: tint,
+            tintOpacity: tintOpacity
+        )
+    }
+
     public func makeNSView(context: Context) -> VariableBlurNSView {
         VariableBlurNSView(
             radius: radius,
@@ -57,11 +67,53 @@ public struct VariableBlurView: NSViewRepresentable {
     }
 
     public func updateNSView(_ nsView: VariableBlurNSView, context: Context) {
-        nsView.radius = radius
-        nsView.edge = edge
-        nsView.offset = offset
-        nsView.bluredTintColor = tint
-        nsView.tintOpacity = tintOpacity
+        context.coordinator.applyChanges(
+            to: nsView,
+            radius: radius,
+            edge: edge,
+            offset: offset,
+            tint: tint,
+            tintOpacity: tintOpacity
+        )
+    }
+
+    public class Coordinator {
+        private var radius: CGFloat
+        private var edge: VariableBlurEdge
+        private var offset: CGFloat
+        private var tint: NSColor?
+        private var tintOpacity: CGFloat?
+
+        init(radius: CGFloat, edge: VariableBlurEdge, offset: CGFloat, tint: NSColor?, tintOpacity: CGFloat?) {
+            self.radius = radius
+            self.edge = edge
+            self.offset = offset
+            self.tint = tint
+            self.tintOpacity = tintOpacity
+        }
+
+        func applyChanges(to view: VariableBlurNSView, radius: CGFloat, edge: VariableBlurEdge, offset: CGFloat, tint: NSColor?, tintOpacity: CGFloat?) {
+            if self.radius != radius {
+                self.radius = radius
+                view.radius = radius
+            }
+            if self.edge != edge {
+                self.edge = edge
+                view.edge = edge
+            }
+            if self.offset != offset {
+                self.offset = offset
+                view.offset = offset
+            }
+            if self.tint != tint {
+                self.tint = tint
+                view.bluredTintColor = tint
+            }
+            if self.tintOpacity != tintOpacity {
+                self.tintOpacity = tintOpacity
+                view.tintOpacity = tintOpacity
+            }
+        }
     }
 }
 
