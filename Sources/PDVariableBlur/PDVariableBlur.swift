@@ -16,46 +16,50 @@ import QuartzCore
 
 
 public struct VariableBlurView: UIViewRepresentable {
-    
     public var maxBlurRadius: CGFloat = 20
-    
     public var edge: VariableBlurEdge = .top
-    
     public var startOffset: CGFloat = 0
-    
     public var tintColor: UIColor?
     public var tintStartOpacity: CGFloat?
 
-    public init(maxBlurRadius: CGFloat = 20,
-                edge: VariableBlurEdge = .top,
-                startOffset: CGFloat = 0,
-                tintColor: UIColor? = nil,
-                tintStartOpacity: CGFloat? = nil) {
-        self.maxBlurRadius      = maxBlurRadius
-        self.edge               = edge
-        self.startOffset        = startOffset
-        self.tintColor          = tintColor
-        self.tintStartOpacity   = tintStartOpacity
+    public init(
+        maxBlurRadius: CGFloat = 20,
+        edge: VariableBlurEdge = .top,
+        startOffset: CGFloat = 0,
+        tintColor: UIColor? = nil,
+        tintStartOpacity: CGFloat? = nil
+    ) {
+        self.maxBlurRadius = maxBlurRadius
+        self.edge = edge
+        self.startOffset = startOffset
+        self.tintColor = tintColor
+        self.tintStartOpacity = tintStartOpacity
     }
 
-    public init(maxBlurRadius: CGFloat = 20,
-                edge: VariableBlurEdge = .top,
-                startOffset: CGFloat = 0,
-                tintColor: Color?,
-                tintStartOpacity: CGFloat? = nil) {
-        self.init(maxBlurRadius: maxBlurRadius,
-                  edge: edge,
-                  startOffset: startOffset,
-                  tintColor: tintColor.map { UIColor($0) },
-                  tintStartOpacity: tintStartOpacity)
+    public init(
+        maxBlurRadius: CGFloat = 20,
+        edge: VariableBlurEdge = .top,
+        startOffset: CGFloat = 0,
+        tintColor: Color?,
+        tintStartOpacity: CGFloat? = nil
+    ) {
+        self.init(
+            maxBlurRadius: maxBlurRadius,
+            edge: edge,
+            startOffset: startOffset,
+            tintColor: tintColor.map { UIColor($0)},
+            tintStartOpacity: tintStartOpacity
+        )
     }
     
     public func makeUIView(context: Context) -> VariableBlurUIView {
-        VariableBlurUIView(maxBlurRadius: maxBlurRadius,
-                           edge: edge,
-                           startOffset: startOffset,
-                           tintColor: tintColor,
-                           tintStartOpacity: tintStartOpacity)
+        VariableBlurUIView(
+            maxBlurRadius: maxBlurRadius,
+            edge: edge,
+            startOffset: startOffset,
+            tintColor: tintColor,
+            tintStartOpacity: tintStartOpacity
+        )
     }
     
     public func updateUIView(_ uiView: VariableBlurUIView, context: Context) {
@@ -65,23 +69,23 @@ public struct VariableBlurView: UIViewRepresentable {
 open class VariableBlurUIView: UIVisualEffectView {
 
     // MARK: - Public Stored Properties
-    public var maxBlurRadius: CGFloat          { didSet { refresh() } }
-    public var edge:           VariableBlurEdge { didSet { refresh() } }
-    /// 0.0〜1.0  (0 = 端から徐々にクリア、1 = ほぼ全域がブラー)
-    public var startOffset:    CGFloat         { didSet { refresh() } }
-    /// nil ならブラーのみ。色を指定すると同勾配でカラーオーバーレイを追加
-    public var bluredTintColor:      UIColor?        { didSet { refresh() } }
+    public var maxBlurRadius: CGFloat { didSet { refresh() } }
+    public var edge: VariableBlurEdge { didSet { refresh() } }
+    public var startOffset: CGFloat { didSet { refresh() } }
+    public var bluredTintColor: UIColor? { didSet { refresh() } }
 
     // MARK: - Private
     private var gradientLayer: CAGradientLayer?
     public var tintStartOpacity: CGFloat? { didSet { refresh() } }
 
     // MARK: - Init
-    public init(maxBlurRadius: CGFloat = 20,
-                edge: VariableBlurEdge = .top,
-                startOffset: CGFloat = 0,
-                tintColor: UIColor? = nil,
-                tintStartOpacity: CGFloat? = nil) {
+    public init(
+        maxBlurRadius: CGFloat = 20,
+        edge: VariableBlurEdge = .top,
+        startOffset: CGFloat = 0,
+        tintColor: UIColor? = nil,
+        tintStartOpacity: CGFloat? = nil
+    ) {
         self.maxBlurRadius = maxBlurRadius
         self.edge          = edge
         self.startOffset   = startOffset
@@ -93,16 +97,20 @@ open class VariableBlurUIView: UIVisualEffectView {
         applyTintGradientIfNeeded()
     }
 
-    public convenience init(maxBlurRadius: CGFloat = 20,
-                            edge: VariableBlurEdge = .top,
-                            startOffset: CGFloat = 0,
-                            tintColor: Color?,
-                            tintStartOpacity: CGFloat? = nil) {
-        self.init(maxBlurRadius: maxBlurRadius,
-                  edge: edge,
-                  startOffset: startOffset,
-                  tintColor: tintColor.map { UIColor($0) },
-                  tintStartOpacity: tintStartOpacity)
+    public convenience init(
+        maxBlurRadius: CGFloat = 20,
+        edge: VariableBlurEdge = .top,
+        startOffset: CGFloat = 0,
+        tintColor: Color?,
+        tintStartOpacity: CGFloat? = nil
+    ) {
+        self.init(
+            maxBlurRadius: maxBlurRadius,
+            edge: edge,
+            startOffset: startOffset,
+            tintColor: tintColor.map { UIColor($0) },
+            tintStartOpacity: tintStartOpacity
+        )
     }
 
     @available(*, unavailable) required public init?(coder: NSCoder) {
@@ -125,7 +133,6 @@ open class VariableBlurUIView: UIVisualEffectView {
     }
 
     // MARK: - Public: 手動更新用
-    /// 外部から変更後に自動で呼ばれる
     public func refresh() {
         applyVariableBlur()
         if bluredTintColor == nil {
@@ -161,9 +168,9 @@ open class VariableBlurUIView: UIVisualEffectView {
         guard let tint = bluredTintColor else { return }
         
         let startAlpha = tintStartOpacity ?? tint.cgColor.alpha
-        let layer      = CAGradientLayer()
-        layer.frame    = bounds
-        layer.colors   = [
+        let layer = CAGradientLayer()
+        layer.frame = bounds
+        layer.colors = [
             tint.withAlphaComponent(startAlpha).cgColor,
             tint.withAlphaComponent(0).cgColor
         ]
@@ -202,9 +209,10 @@ open class VariableBlurUIView: UIVisualEffectView {
     }
 
     // MARK: - Gradient Mask Image for CAFilter
-    private func makeGradientImage(width: CGFloat = 100,
-                                   height: CGFloat = 100) -> CGImage
-    {
+    private func makeGradientImage(
+        width: CGFloat = 100,
+        height: CGFloat = 100
+    ) -> CGImage{
         let filter = CIFilter.linearGradient()
         filter.color0 = CIColor.black
         filter.color1 = CIColor.clear
@@ -225,10 +233,7 @@ open class VariableBlurUIView: UIVisualEffectView {
         }
 
         let ciImage = filter.outputImage!
-        return CIContext().createCGImage(ciImage,
-                                         from: CGRect(x: 0, y: 0,
-                                                      width: width,
-                                                      height: height))!
+        return CIContext().createCGImage(ciImage,from: CGRect(x: 0, y: 0,width: width,height: height))!
     }
 }
 
