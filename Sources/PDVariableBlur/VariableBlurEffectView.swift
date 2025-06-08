@@ -21,6 +21,7 @@ open class VariableBlurEffectView: BlurViewBase {
 #if canImport(AppKit)
     private let containerLayer = CALayer()
     private let backdropLayer: CALayer
+    private var cachedScale: CGFloat?
 #endif
     private var gradientLayer: CAGradientLayer?
 
@@ -109,7 +110,18 @@ open class VariableBlurEffectView: BlurViewBase {
     open override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
         guard let window else { return }
-        backdropLayer.setValue(window.backingScaleFactor, forKey: "scale")
+        let windowScale = window.backingScaleFactor
+        backdropLayer.setValue(windowScale, forKey: "scale")
+        cachedScale = windowScale
+    }
+
+    open override func viewDidChangeBackingProperties() {
+        super.viewDidChangeBackingProperties()
+        guard let window else { return }
+        let windowScale = window.backingScaleFactor
+        if cachedScale == windowScale { return }
+        backdropLayer.setValue(windowScale, forKey: "scale")
+        cachedScale = windowScale
     }
 #endif
 
