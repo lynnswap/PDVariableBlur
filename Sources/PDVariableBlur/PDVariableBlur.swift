@@ -11,7 +11,7 @@ import CoreImage.CIFilterBuiltins
 import QuartzCore
 import SwiftUI
 
-public struct VariableBlurViewRepresentable: UIViewRepresentable {
+public struct VariableBlurView: UIViewRepresentable {
     public var radius: CGFloat = 20
     public var edge: VariableBlurEdge = .top
     public var offset: CGFloat = 0
@@ -48,8 +48,8 @@ public struct VariableBlurViewRepresentable: UIViewRepresentable {
         )
     }
     
-    public func makeUIView(context: Context) -> VariableBlurView {
-        VariableBlurView(
+    public func makeUIView(context: Context) -> VariableBlurEffectView {
+        VariableBlurEffectView(
             radius: radius,
             edge: edge,
             offset: offset,
@@ -58,7 +58,7 @@ public struct VariableBlurViewRepresentable: UIViewRepresentable {
         )
     }
 
-    public func updateUIView(_ uiView: VariableBlurView, context: Context) {
+    public func updateUIView(_ uiView: VariableBlurEffectView, context: Context) {
         uiView.update(
             radius: radius,
             edge: edge,
@@ -69,7 +69,7 @@ public struct VariableBlurViewRepresentable: UIViewRepresentable {
     }
 }
 
-open class VariableBlurView: UIVisualEffectView {
+open class VariableBlurEffectView: UIVisualEffectView {
 
     private var radius: CGFloat
     private var edge: VariableBlurEdge

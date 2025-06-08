@@ -34,10 +34,10 @@ The following values can be specified with `variableBlur`:
 - `tintOpacity`: explicit opacity value for `tint`.
 - `isEnabled`: toggles the overlay on and off. Default is `true`.
 
-### VariableBlurView and VariableBlurViewRepresentable
+### VariableBlurEffectView and VariableBlurView
 
-`VariableBlurView` implements the variable blur using `UIVisualEffectView` or `NSView`.
-`VariableBlurViewRepresentable` exposes this view to SwiftUI, and the `variableBlur` modifier uses it internally.
+`VariableBlurEffectView` implements the variable blur using `UIVisualEffectView` or `NSView`.
+`VariableBlurView` exposes this view to SwiftUI, and the `variableBlur` modifier uses it internally.
 
 Install via Swift Package Manager and import `PDVariableBlur` in your project.
 
