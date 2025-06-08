@@ -1,23 +1,34 @@
 #if canImport(UIKit)
 import UIKit
+public typealias BlurViewBase = UIVisualEffectView
+public typealias BlurColor = UIColor
+#elseif canImport(AppKit)
+import AppKit
+public typealias BlurViewBase = NSView
+public typealias BlurColor = NSColor
+#endif
 import QuartzCore
 import CoreImage.CIFilterBuiltins
 
-open class VariableBlurEffectView: UIVisualEffectView {
+open class VariableBlurEffectView: BlurViewBase {
     private var radius: CGFloat
     private var edge: VariableBlurEdge
     private var offset: CGFloat
-    private var bluredTintColor: UIColor?
+    private var bluredTintColor: BlurColor?
     private var tintOpacity: CGFloat?
 
+#if canImport(AppKit)
+    private let containerLayer = CALayer()
+    private let backdropLayer: CALayer
+#endif
     private var gradientLayer: CAGradientLayer?
 
-    // MARK: - Init
+    // MARK: Init
     public init(
         radius: CGFloat = 20,
         edge: VariableBlurEdge,
         offset: CGFloat = 0,
-        tint: UIColor? = nil,
+        tint: BlurColor? = nil,
         tintOpacity: CGFloat? = nil
     ) {
         self.radius = radius
@@ -25,8 +36,25 @@ open class VariableBlurEffectView: UIVisualEffectView {
         self.offset = offset
         self.bluredTintColor = tint
         self.tintOpacity = tintOpacity
+#if canImport(UIKit)
         super.init(effect: UIBlurEffect(style: .systemUltraThinMaterialDark))
         isUserInteractionEnabled = false
+#else
+        if let BackdropLayerClass = NSClassFromString("CABackdropLayer") as? CALayer.Type {
+            backdropLayer = BackdropLayerClass.init()
+        } else {
+            backdropLayer = CALayer()
+        }
+        super.init(frame: .zero)
+        wantsLayer = true
+        layerUsesCoreImageFilters = true
+        containerLayer.frame = bounds
+        containerLayer.autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
+        layer = containerLayer
+        backdropLayer.frame = bounds
+        backdropLayer.autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
+        containerLayer.addSublayer(backdropLayer)
+#endif
         applyVariableBlur()
         applyTintGradientIfNeeded()
     }
@@ -38,6 +66,7 @@ open class VariableBlurEffectView: UIVisualEffectView {
         tint: Color?,
         tintOpacity: CGFloat? = nil
     ) {
+#if canImport(UIKit)
         self.init(
             radius: radius,
             edge: edge,
@@ -45,31 +74,50 @@ open class VariableBlurEffectView: UIVisualEffectView {
             tint: tint.map { UIColor($0) },
             tintOpacity: tintOpacity
         )
+#else
+        self.init(
+            radius: radius,
+            edge: edge,
+            offset: offset,
+            tint: tint.map { NSColor($0) },
+            tintOpacity: tintOpacity
+        )
+#endif
     }
 
     @available(*, unavailable)
-    required public init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    required public init?(coder: NSCoder) { fatalError() }
 
-    // MARK: - Layout Updates
+#if canImport(UIKit)
     open override func layoutSubviews() {
         super.layoutSubviews()
-        gradientLayer?.frame = bounds
+        layoutUpdate()
     }
 
     open override func didMoveToWindow() {
-        guard
-            let window,
-            let backdropLayer = subviews.first?.layer
-        else { return }
-        backdropLayer.setValue(window.screen.scale, forKey: "scale")
+        super.didMoveToWindow()
+        guard let window, let layer = targetLayer else { return }
+        layer.setValue(window.screen.scale, forKey: "scale")
+    }
+#else
+    open override func layout() {
+        super.layout()
+        layoutUpdate()
     }
 
-    /// Updates multiple parameters at once and refreshes the view when needed.
+    open override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        guard let window else { return }
+        targetLayer.setValue(window.backingScaleFactor, forKey: "scale")
+    }
+#endif
+
+    // MARK: - Updates
     public func update(
         radius: CGFloat? = nil,
         edge: VariableBlurEdge? = nil,
         offset: CGFloat? = nil,
-        tint: UIColor? = nil,
+        tint: BlurColor? = nil,
         tintOpacity: CGFloat? = nil
     ) {
         var changed = false
@@ -96,19 +144,26 @@ open class VariableBlurEffectView: UIVisualEffectView {
         }
     }
 
-    // MARK: - Variable-blur
+    // MARK: - Layout Helpers
+    private func layoutUpdate() {
+#if canImport(AppKit)
+        backdropLayer.frame = bounds
+#endif
+        gradientLayer?.frame = bounds
+    }
+
+    // MARK: - Variable Blur
     private func applyVariableBlur() {
         guard
             let CAFilter = NSClassFromString("CAFilter") as? NSObject.Type,
-            let variableBlur = CAFilter.perform(NSSelectorFromString("filterWithType:"), with: "variableBlur")
-                  .takeUnretainedValue() as? NSObject
+            let variableBlur = CAFilter.perform(NSSelectorFromString("filterWithType:"), with: "variableBlur")?.takeUnretainedValue() as? NSObject
         else { return }
 
         variableBlur.setValue(radius, forKey: "inputRadius")
         variableBlur.setValue(edge.gradientMaskImage(offset: offset), forKey: "inputMaskImage")
-        variableBlur.setValue(true,           forKey: "inputNormalizeEdges")
+        variableBlur.setValue(true, forKey: "inputNormalizeEdges")
 
-        subviews.first?.layer.filters = [variableBlur]
+        targetLayer?.filters = [variableBlur]
     }
 
     // MARK: - Tint Gradient
@@ -126,157 +181,8 @@ open class VariableBlurEffectView: UIVisualEffectView {
         layer.startPoint = points.start
         layer.endPoint   = points.end
         layer.locations = [0, NSNumber(value: 1 - Float(offset))]
-        contentView.layer.addSublayer(layer)
-        gradientLayer = layer
-    }
 
-    private func updateTintGradient() {
-        guard let layer = gradientLayer, let tint = bluredTintColor else { return }
-        let startAlpha = tintOpacity ?? tint.cgColor.alpha
-        layer.colors   = [
-            tint.withAlphaComponent(startAlpha).cgColor,
-            tint.withAlphaComponent(0).cgColor
-        ]
-        let points = edge.gradientPoints
-        layer.startPoint = points.start
-        layer.endPoint   = points.end
-        layer.locations = [0, NSNumber(value: 1 - Float(offset))]
-    }
-}
-#elseif canImport(AppKit)
-import AppKit
-import QuartzCore
-import CoreImage.CIFilterBuiltins
-
-open class VariableBlurEffectView: NSView {
-    private var radius: CGFloat
-    private var edge: VariableBlurEdge
-    private var offset: CGFloat
-    private var bluredTintColor: NSColor?
-    private var tintOpacity: CGFloat?
-
-    private let containerLayer = CALayer()
-    private let backdropLayer: CALayer
-    private var gradientLayer: CAGradientLayer?
-
-    // MARK: Init
-    public init(
-        radius: CGFloat = 20,
-        edge: VariableBlurEdge,
-        offset: CGFloat = 0,
-        tint: NSColor? = nil,
-        tintOpacity: CGFloat? = nil
-    ) {
-        self.radius = radius
-        self.edge = edge
-        self.offset = offset
-        self.bluredTintColor = tint
-        self.tintOpacity = tintOpacity
-
-        if let BackdropLayerClass = NSClassFromString("CABackdropLayer") as? CALayer.Type {
-            backdropLayer = BackdropLayerClass.init()
-        } else {
-            backdropLayer = CALayer()
-        }
-
-        super.init(frame: .zero)
-
-        wantsLayer = true
-        layerUsesCoreImageFilters = true
-
-        // containerLayer をルートにしてフィルタから隔離
-        containerLayer.frame = bounds
-        containerLayer.autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
-        layer = containerLayer
-
-        // variableBlur を掛けるターゲットは backdropLayer
-        backdropLayer.frame = bounds
-        backdropLayer.autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
-        containerLayer.addSublayer(backdropLayer)
-
-        applyVariableBlur()
-        applyTintGradientIfNeeded()
-    }
-
-    @available(*, unavailable)
-    required public init?(coder: NSCoder) { fatalError() }
-
-    // MARK: Layout
-    open override func layout() {
-        super.layout()
-        backdropLayer.frame = bounds
-        gradientLayer?.frame = bounds
-    }
-
-    open override func viewDidMoveToWindow() {
-        super.viewDidMoveToWindow()
-        guard let window else { return }
-        backdropLayer.setValue(window.backingScaleFactor, forKey: "scale")
-    }
-
-    /// Updates multiple parameters at once and refreshes the view when needed.
-    public func update(
-        radius: CGFloat? = nil,
-        edge: VariableBlurEdge? = nil,
-        offset: CGFloat? = nil,
-        tint: NSColor? = nil,
-        tintOpacity: CGFloat? = nil
-    ) {
-        var changed = false
-        if let radius, self.radius != radius { self.radius = radius; changed = true }
-        if let edge, self.edge != edge { self.edge = edge; changed = true }
-        if let offset, self.offset != offset { self.offset = offset; changed = true }
-        if let tint, self.bluredTintColor != tint { self.bluredTintColor = tint; changed = true }
-        if let tintOpacity, self.tintOpacity != tintOpacity { self.tintOpacity = tintOpacity; changed = true }
-        if changed { refresh() }
-    }
-
-    // MARK: Public
-    public func refresh() {
-        applyVariableBlur()
-        if bluredTintColor == nil {
-            gradientLayer?.removeFromSuperlayer()
-            gradientLayer = nil
-        } else {
-            if gradientLayer == nil {
-                applyTintGradientIfNeeded()
-            } else {
-                updateTintGradient()
-            }
-        }
-    }
-
-    // MARK: Variable-blur
-    private func applyVariableBlur() {
-        guard let CAFilter = NSClassFromString("CAFilter") as? NSObject.Type,
-              let variableBlur = CAFilter.perform(NSSelectorFromString("filterWithType:"),with: "variableBlur")?.takeUnretainedValue() as? NSObject else {
-            return
-        }
-
-        variableBlur.setValue(radius, forKey: "inputRadius")
-        variableBlur.setValue(edge.gradientMaskImage(offset: offset), forKey: "inputMaskImage")
-        variableBlur.setValue(true, forKey: "inputNormalizeEdges")
-
-        backdropLayer.filters = [variableBlur]
-    }
-
-    // MARK: Tint Gradient
-    private func applyTintGradientIfNeeded() {
-        guard let tint = bluredTintColor else { return }
-
-        let startAlpha = tintOpacity ?? tint.cgColor.alpha
-        let layer = CAGradientLayer()
-        layer.frame = bounds
-        layer.colors = [
-            tint.withAlphaComponent(startAlpha).cgColor,
-            tint.withAlphaComponent(0).cgColor
-        ]
-        let points = edge.gradientPoints
-        layer.startPoint = points.start
-        layer.endPoint   = points.end
-        layer.locations = [0, NSNumber(value: 1 - Float(offset))]
-
-        containerLayer.addSublayer(layer)
+        gradientContainer.addSublayer(layer)
         gradientLayer = layer
     }
 
@@ -292,5 +198,12 @@ open class VariableBlurEffectView: NSView {
         layer.endPoint   = points.end
         layer.locations = [0, NSNumber(value: 1 - Float(offset))]
     }
-}
+
+#if canImport(UIKit)
+    private var targetLayer: CALayer? { subviews.first?.layer }
+    private var gradientContainer: CALayer { contentView.layer }
+#else
+    private var targetLayer: CALayer? { backdropLayer }
+    private var gradientContainer: CALayer { containerLayer }
 #endif
+}
