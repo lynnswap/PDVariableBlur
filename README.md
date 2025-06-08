@@ -38,6 +38,7 @@ The following values can be specified with `variableBlur`:
 
 `VariableBlurEffectView` implements the variable blur using `UIVisualEffectView` or `NSView`.
 `VariableBlurView` exposes this view to SwiftUI, and the `variableBlur` modifier uses it internally.
+Both types live in separate files and switch between UIKit and AppKit with `#if` directives.
 
 Install via Swift Package Manager and import `PDVariableBlur` in your project.
 
