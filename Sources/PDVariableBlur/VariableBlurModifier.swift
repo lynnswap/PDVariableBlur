@@ -42,7 +42,7 @@ public extension View {
     ) -> some View {
         overlay(alignment: edge.overlayAlignment) {
             if isEnabled {
-                VariableBlurViewRepresentable(
+                VariableBlurView(
                     radius: radius,
                     edge: edge,
                     offset: offset,
