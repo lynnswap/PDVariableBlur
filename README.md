@@ -1,10 +1,13 @@
 # PDVariableBlur
 
-PDVariableBlur provides a variable blur effect for SwiftUI views on iOS and macOS.
+PDVariableBlur provides a variable blur effect for views on iOS and macOS.
+Use the `variableBlur` modifier in SwiftUI or `VariableBlurEffectView` directly in UIKit and AppKit.
 
 You can find a simple preview setup in `Sources/PDVariableBlur/Example.swift`. Open the **Examples** scheme in Xcode to view the preview.
 
 ## Usage
+
+### SwiftUI
 
 `variableBlur` can be used on any `View`:
 
@@ -22,7 +25,21 @@ ZStack {
 .ignoresSafeArea()
 ```
 
-### Parameters
+
+### UIKit / AppKit
+
+`VariableBlurEffectView` implements the variable blur using `UIVisualEffectView` or `NSView`.
+Use this view directly when adding the effect in UIKit or AppKit:
+
+```swift
+let blurView = VariableBlurEffectView(edge: .bottom)
+blurView.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: 150)
+view.addSubview(blurView)
+```
+
+`VariableBlurView` bridges `VariableBlurEffectView` for SwiftUI, and the `variableBlur` modifier uses it internally.
+
+## Parameters
 
 The following values can be specified with `variableBlur`:
 
@@ -32,13 +49,7 @@ The following values can be specified with `variableBlur`:
 - `offset`: start position of the gradient, from `0` to `1`.
 - `tint`: color overlay applied to the blurred area.
 - `tintOpacity`: explicit opacity value for `tint`.
-- `isEnabled`: toggles the overlay on and off. Default is `true`.
-
-### VariableBlurEffectView and VariableBlurView
-
-`VariableBlurEffectView` implements the variable blur using `UIVisualEffectView` or `NSView`.
-`VariableBlurView` exposes this view to SwiftUI, and the `variableBlur` modifier uses it internally.
-Both types live in separate files and switch between UIKit and AppKit with `#if` directives.
+- `isEnabled`: toggles the overlay on and off. Default is `true`. Available only with the `.variableBlur(...)` modifier.
 
 Install via Swift Package Manager and import `PDVariableBlur` in your project.
 
