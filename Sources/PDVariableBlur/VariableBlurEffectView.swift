@@ -7,6 +7,7 @@ import AppKit
 public typealias BlurViewBase = NSView
 public typealias BlurColor = NSColor
 #endif
+import SwiftUI
 import QuartzCore
 import CoreImage.CIFilterBuiltins
 
@@ -108,7 +109,7 @@ open class VariableBlurEffectView: BlurViewBase {
     open override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
         guard let window else { return }
-        targetLayer.setValue(window.backingScaleFactor, forKey: "scale")
+        backdropLayer.setValue(window.backingScaleFactor, forKey: "scale")
     }
 #endif
 
