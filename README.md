@@ -63,7 +63,7 @@ Install via Swift Package Manager and import `PDVariableBlur` in your project.
 ## Apps Using
 
 <p float="left">
-    <a href="https://apps.apple.com/jp/app/tweetpd/id1671411031"><img src="https://i.imgur.com/AC6eGdx.png" height="65"></a>
+    <a href="https://apps.apple.com/jp/app/tweetpd/id1671411031"><img src="https://i.imgur.com/AC6eGdx.png" width="65" height="65"></a>
 </p>
 
 ## License
